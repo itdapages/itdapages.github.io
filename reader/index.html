@@ -466,11 +466,30 @@
   }
   const level = (s) => (s >= 75 ? '높음' : s >= 40 ? '보통' : '낮음');
 
+  /* ───── 결과 링크 코드 ─────
+     25개 답(각 1~5)을 5진수 한 숫자로 보고 36진수(0-9a-z) 12글자로 줄여 링크(#r=…)에 담아요.
+     서버가 없어서, 링크를 연 사람의 브라우저가 이 코드로 답을 되살려 점수를 다시 계산해요. */
+  const CODE_LEN = 12;
+  function encodeAnswers(ans) {
+    let n = 0n;
+    for (const a of ans) n = n * 5n + BigInt(a - 1);
+    return n.toString(36).padStart(CODE_LEN, '0');
+  }
+  function decodeAnswers(code) {
+    if (!/^[0-9a-z]+$/.test(code) || code.length !== CODE_LEN) return null;
+    let n = 0n;
+    for (const ch of code) n = n * 36n + BigInt(parseInt(ch, 36));
+    if (n >= 5n ** BigInt(N)) return null;
+    const out = new Array(N);
+    for (let i = N - 1; i >= 0; i--) { out[i] = Number(n % 5n) + 1; n /= 5n; }
+    return out;
+  }
+
   /* ───── 결과 ───── */
   function finish() {
     $('progress').firstElementChild.style.width = '100%';
     const secs = startedAt ? Math.round((Date.now() - startedAt) / 1000) : 0;
-    try { history.replaceState(null, '', `#r=${answers.join('')}`); } catch (_) {}
+    try { history.replaceState(null, '', `#r=${encodeAnswers(answers)}`); } catch (_) {}
     renderResult(answers, { secs, shared: false });
   }
 
@@ -896,10 +915,14 @@
   });
 
   /* 공유 링크(#r=…)로 들어온 경우 결과를 바로 보여 줌 */
-  const m = location.hash.match(/^#r=([1-5]{25})$/);
+  //   새 형식: 12글자 코드 / 예전 형식: 답 25자리 숫자 (이미 공유된 링크도 열리게)
+  const m = location.hash.match(/^#r=([0-9a-z]+)$/);
   if (m) {
-    answers = m[1].split('').map(Number);
-    renderResult(answers, { secs: 0, shared: true });
+    const got = /^[1-5]{25}$/.test(m[1]) ? m[1].split('').map(Number) : decodeAnswers(m[1]);
+    if (got) {
+      answers = got;
+      renderResult(answers, { secs: 0, shared: true });
+    }
   }
 })();
 </script>
