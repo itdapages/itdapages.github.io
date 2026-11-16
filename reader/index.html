@@ -550,15 +550,40 @@
   let lastTop = null;
   let lastResult = null;
 
-  /* ───── 결과 이미지 (1080×1920, 인스타 스토리 비율) ───── */
-  const FONT = '"Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
-  const fnt = (w, px) => `${w} ${px}px ${FONT}`;
+  /* ───── 결과 이미지 (1080×1920, 인스타 스토리 비율) ─────
+     손글씨 느낌: 그리운 묘은흘림체 + 크레파스 칠 + 손으로 그은 테두리.
+     글꼴(fonts/img-*.woff2)은 이미지에 쓰는 글자만 담은 부분 글꼴이라,
+     유형 이름·설명·작가나 이미지 문구를 바꾸면 글꼴도 다시 만들어야 해요. */
+  const TITLE_FAMILY = 'ItdaHand';            // 유형 이름 글씨체: 'ItdaHand'(묘은흘림) 또는 'ItdaTitle'(꾸불림)
+  const IMG_FONTS = [['ItdaHand', '../fonts/img-hand.woff2'], ['ItdaTitle', '../fonts/img-title.woff2']]
+    .filter(([fam]) => fam === 'ItdaHand' || fam === TITLE_FAMILY);
+  const HAND = '"ItdaHand", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
+  const TITLE = `"${TITLE_FAMILY}", ${HAND}`;
+  const hf = (px, fam = HAND) => `${px}px ${fam}`;
   const C = { black: '#000000', ink: '#4B4845', cream: '#FAF3E8', white: '#FFFFFF', orange: '#F3AD46' };
-  let imgJob = null, imgBlob = null;
+  let imgJob = null, imgBlob = null, fontsJob = null;
 
   const loadImg = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+  function loadImgFonts() {
+    if (!fontsJob) {
+      fontsJob = Promise.all(IMG_FONTS.map(([fam, url]) =>
+        new FontFace(fam, `url(${url})`).load().then((ff) => { document.fonts.add(ff); }).catch(() => {})));
+    }
+    return fontsJob;
+  }
+  // 같은 결과면 늘 같은 그림이 나오도록 정해진 난수
+  function seeded(str) {
+    let h = 2166136261;
+    for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+    return () => {
+      h = (h + 0x6D2B79F5) | 0;
+      let t = Math.imul(h ^ (h >>> 15), h | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
   function rr(ctx, x, y, w, h, r) {
-    ctx.beginPath();
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
     ctx.moveTo(x + r, y);
     ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
@@ -577,187 +602,237 @@
     if (line) lines.push(line);
     return lines;
   }
-  function drawCard(ctx, x, y, w, h, shadow) {
-    ctx.fillStyle = shadow; rr(ctx, x + 14, y + 14, w, h, 28); ctx.fill();
-    ctx.fillStyle = C.white; rr(ctx, x, y, w, h, 28); ctx.fill();
-    ctx.lineWidth = 6; ctx.strokeStyle = C.black; ctx.stroke();
+  function withRot(ctx, cx, cy, deg, fn) {
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(deg * Math.PI / 180); ctx.translate(-cx, -cy); fn(); ctx.restore();
   }
-  function drawPill(ctx, x, y, text, bg) {
-    ctx.font = fnt(700, 30);
-    const w = ctx.measureText(text).width + 44, h = 58;
-    ctx.fillStyle = bg; rr(ctx, x, y, w, h, 14); ctx.fill();
-    ctx.lineWidth = 4; ctx.strokeStyle = C.black; ctx.stroke();
-    ctx.fillStyle = C.black; ctx.textBaseline = 'middle'; ctx.fillText(text, x + 22, y + h / 2 + 1); ctx.textBaseline = 'alphabetic';
-    return h;
+  function txt(ctx, s, x, y, { px = 44, fam = HAND, color = C.black, bold = 0, align = 'left' } = {}) {
+    ctx.font = hf(px, fam); ctx.fillStyle = color; ctx.textAlign = align;
+    if (bold) { ctx.lineWidth = bold; ctx.strokeStyle = color; ctx.lineJoin = 'round'; ctx.strokeText(s, x, y); }
+    ctx.fillText(s, x, y);
+    ctx.textAlign = 'left';
+  }
+  // 손으로 그은 선: 가운데 점들을 살짝 흔들어 부드럽게 이음
+  function handLine(ctx, R, x1, y1, x2, y2, j = 2.5, seg = 3) {
+    const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len;
+    const pts = [[x1, y1]];
+    for (let i = 1; i < seg; i++) { const t = i / seg, o = (R() - 0.5) * 2 * j; pts.push([x1 + dx * t + nx * o, y1 + dy * t + ny * o]); }
+    pts.push([x2, y2]);
+    ctx.moveTo(x1, y1);
+    for (let i = 1; i < pts.length - 1; i++) {
+      ctx.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
+    }
+    ctx.lineTo(x2, y2);
+  }
+  function stroke(ctx, lw, color = C.black) { ctx.lineWidth = lw; ctx.strokeStyle = color; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(); }
+  // 손으로 두 번 그은 네모 (모서리가 살짝 삐져나옴)
+  function handRect(ctx, R, x, y, w, h, { lw = 5, color = C.black, j = 3 } = {}) {
+    for (let p = 0; p < 2; p++) {
+      const o = () => (R() - 0.5) * 5;
+      const seg = (a, b, c, d) => {
+        ctx.beginPath(); handLine(ctx, R, a + o(), b + o(), c + o(), d + o(), j, Math.max(2, Math.round(Math.hypot(c - a, d - b) / 150)));
+        stroke(ctx, p ? lw * 0.5 : lw, color);
+      };
+      seg(x - 4, y, x + w + 5, y); seg(x + w, y - 4, x + w, y + h + 5);
+      seg(x + w + 4, y + h, x - 5, y + h); seg(x, y + h + 4, x, y - 5);
+    }
+  }
+  // 크레파스로 칠하기: 비스듬한 획을 촘촘히 긋고, 반대 방향으로 한 번 더 옅게
+  function crayon(ctx, R, x, y, w, h, color, { gap = 5, lw = 6, alpha = 0.85, round = 0 } = {}) {
+    ctx.save();
+    ctx.beginPath(); rr(ctx, x, y, w, h, round); ctx.clip();
+    ctx.strokeStyle = color; ctx.lineCap = 'round';
+    const k = 0.55;
+    [[1, alpha, 1], [-1, alpha * 0.4, 1.8]].forEach(([dir, a, g]) => {
+      for (let i = -h * k - 12; i < w + h * k + 12; i += gap * g) {
+        ctx.globalAlpha = a * (0.65 + R() * 0.35);
+        ctx.lineWidth = lw * (0.7 + R() * 0.6);
+        const x1 = x + i + (R() - 0.5) * 4;
+        ctx.beginPath(); ctx.moveTo(x1, y + h + 6); ctx.lineTo(x1 + dir * h * k + (R() - 0.5) * 4, y - 6); ctx.stroke();
+      }
+    });
+    ctx.restore();
+  }
+  function paper(ctx, R, W, H) {
+    ctx.fillStyle = C.cream; ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 9000; i++) {
+      ctx.fillStyle = `rgba(75,72,69,${(R() * 0.07).toFixed(3)})`;
+      ctx.fillRect(R() * W, R() * H, 1.5 + R() * 1.5, 1.5 + R() * 1.5);
+    }
+  }
+  function handCard(ctx, R, x, y, w, h, shadow) {
+    crayon(ctx, R, x + 16, y + 18, w, h, shadow, { round: 18, alpha: 0.95, lw: 7, gap: 5 });
+    ctx.fillStyle = C.white; ctx.beginPath(); rr(ctx, x, y, w, h, 16); ctx.fill();
+    handRect(ctx, R, x, y, w, h, { lw: 5.5, j: 3 });
   }
 
-  // 높은 영역 카드 내용. draw=false면 높이만 계산
-  function topBlock(ctx, x, y, w, t, s, draw) {
-    const x0 = x + 52, iw = w - 104;
-    let yy = y + 50;
+  // 카드 1: 높은 영역. draw=false면 높이만 계산
+  function topCard(ctx, R, x, y, w, t, s, draw) {
+    const x0 = x + 54, iw = w - 108;
+    let yy = y + 44;
+    ctx.font = hf(40);
+    const pw = ctx.measureText('내가 높은 영역').width + 50, ph = 66;
     if (draw) {
-      const ph = drawPill(ctx, x0, yy, '내가 높은 영역', t.color);
-      ctx.textAlign = 'right';
-      ctx.font = fnt(500, 28); ctx.fillStyle = C.ink;
-      const suf = `점 · ${level(s.score)}`;
-      ctx.fillText(suf, x + w - 52, yy + ph / 2 + 12);
-      const sw = ctx.measureText(suf).width;
-      ctx.font = fnt(900, 44); ctx.fillStyle = C.black;
-      ctx.fillText(String(s.score), x + w - 52 - sw - 4, yy + ph / 2 + 14);
-      ctx.textAlign = 'left';
+      crayon(ctx, R, x0, yy, pw, ph, t.color, { round: 18 });
+      handRect(ctx, R, x0, yy, pw, ph, { lw: 4, j: 2 });
+      txt(ctx, '내가 높은 영역', x0 + 25, yy + 47, { px: 40, bold: 0.8 });
+      ctx.font = hf(40);
+      const suf = `점 · ${level(s.score)}`, sw = ctx.measureText(suf).width;
+      txt(ctx, suf, x + w - 54, yy + 52, { px: 40, color: C.ink, align: 'right' });
+      txt(ctx, String(s.score), x + w - 62 - sw, yy + 56, { px: 76, bold: 2, align: 'right' });
     }
-    yy += 58 + 34;
-    // 유형 이름: 두 줄 안에 들어가도록 글자 크기 조절
-    let fs = 66, lines;
-    do { ctx.font = fnt(900, fs); lines = wrapText(ctx, t.name, iw); fs -= 2; } while (lines.length > 2 && fs > 44);
+    yy += ph + 28;
+    // 유형 이름: 두 줄 안에 들어가도록 크기 조절
+    let fs = 88, lines;
+    do { ctx.font = hf(fs, TITLE); lines = wrapText(ctx, t.name, iw); fs -= 2; } while (lines.length > 2 && fs > 56);
     fs += 2;
-    const lh = Math.round(fs * 1.32);
+    const lh = Math.round(fs * 1.22);
     lines.forEach((ln) => {
-      const base = yy + fs;
+      const base = yy + fs * 0.9;
       if (draw) {
-        ctx.font = fnt(900, fs);
+        ctx.font = hf(fs, TITLE);
         const lw = ctx.measureText(ln).width;
-        ctx.fillStyle = t.color; ctx.fillRect(x0 - 4, base - fs * 0.26, lw + 8, fs * 0.34);
-        ctx.fillStyle = C.black; ctx.fillText(ln, x0, base);
+        crayon(ctx, R, x0 - 10, base - fs * 0.24, lw + 20, fs * 0.36, t.color, { round: fs * 0.21, alpha: 0.75, lw: 7 });
+        txt(ctx, ln, x0, base, { px: fs, fam: TITLE, bold: 1.8 });
       }
       yy += lh;
     });
-    yy += 8;
-    ctx.font = fnt(400, 34);
-    wrapText(ctx, t.desc, iw).forEach((ln) => { if (draw) { ctx.fillStyle = C.black; ctx.fillText(ln, x0, yy + 36); } yy += 54; });
-    yy += 24;
-    if (draw) { ctx.font = fnt(700, 28); ctx.fillStyle = C.ink; ctx.fillText('추천 방향', x0, yy + 28); }
-    yy += 28 + 20;
-    // 작가 칩
-    ctx.font = fnt(700, 32);
-    let cxp = x0; const chH = 66, gap = 14;
+    yy += 14;
+    ctx.font = hf(46);
+    wrapText(ctx, t.desc, iw).forEach((ln) => { if (draw) txt(ctx, ln, x0, yy + 44, { px: 46 }); yy += 60; });
+    yy += 22;
+    if (draw) txt(ctx, '추천 방향', x0, yy + 38, { px: 38, color: C.ink });
+    yy += 38 + 18;
+    let cxp = x0; const chH = 68, gap = 14;
     t.authors.forEach((a) => {
-      const cw = ctx.measureText(a).width + 52;
+      ctx.font = hf(40);
+      const cw = ctx.measureText(a).width + 44;
       if (cxp + cw > x0 + iw) { cxp = x0; yy += chH + gap; }
       if (draw) {
-        ctx.fillStyle = C.cream; rr(ctx, cxp, yy, cw, chH, 12); ctx.fill();
-        ctx.lineWidth = 4; ctx.strokeStyle = C.black; ctx.stroke();
-        ctx.fillStyle = C.black; ctx.textBaseline = 'middle'; ctx.fillText(a, cxp + 26, yy + chH / 2 + 1); ctx.textBaseline = 'alphabetic';
+        const bx = cxp, by = yy;
+        withRot(ctx, bx + cw / 2, by + chH / 2, (R() - 0.5) * 4, () => {
+          ctx.fillStyle = C.cream; ctx.beginPath(); rr(ctx, bx, by, cw, chH, 14); ctx.fill();
+          handRect(ctx, R, bx, by, cw, chH, { lw: 3.5, j: 1.8 });
+          txt(ctx, a, bx + 22, by + 47, { px: 40, bold: 0.6 });
+        });
       }
       cxp += cw + gap;
     });
-    yy += chH + 50;
+    yy += chH + 46;
     return yy - y;
   }
 
-  // 막대 분석표 (화면의 분석표와 같은 모양): 낮음 0~39 · 보통 40~74 · 높음 75~100
-  function drawBars(ctx, x0, y, iw, rowH, by, topId) {
-    const labelW = 210, gap = 22, scoreW = 76;
+  // 카드 2: 막대 분석표 + 높은/낮은 영역 요약
+  const card2Height = (rowH) => 50 + 90 + 54 + 8 + rowH * ORDER.length + 34 + 150 + 34;
+  function barsCard(ctx, R, x, y, w, rowH, res) {
+    const { by, top, low, even } = res;
+    const x0 = x + 54, iw = w - 108;
+    let yy = y + 50;
+    txt(ctx, '독서 취향 분석표', x0, yy + 50, { px: 60, bold: 1.6 });
+    yy += 90;
+    const labelW = 250, gap = 20, scoreW = 84;
     const tx = x0 + labelW + gap, tw = iw - labelW - gap * 2 - scoreW;
-    const headH = 56;
-    // 머리줄
-    const zones = [['낮음', 0, 0.4], ['보통', 0.4, 0.75], ['높음', 0.75, 1]];
-    ctx.font = fnt(700, 26); ctx.fillStyle = C.black; ctx.textAlign = 'center';
-    zones.forEach(([lab, a, b]) => ctx.fillText(lab, tx + tw * (a + b) / 2, y + 34));
-    ctx.textAlign = 'left';
-    ctx.lineWidth = 4; ctx.strokeStyle = C.black;
-    ctx.beginPath(); ctx.moveTo(tx, y + headH); ctx.lineTo(tx + tw, y + headH); ctx.stroke();
-    const rowsTop = y + headH + 10, rowsBottom = rowsTop + rowH * ORDER.length;
-    // 보통 구간 음영
-    ctx.fillStyle = 'rgba(243,173,70,.18)';
-    ORDER.forEach((_, i) => ctx.fillRect(tx + tw * 0.4, rowsTop + i * rowH + rowH * 0.18, tw * 0.35, rowH * 0.64));
-    // 점선 기준선
-    ctx.setLineDash([8, 8]); ctx.lineWidth = 3;
-    [0.4, 0.75].forEach((f) => { ctx.beginPath(); ctx.moveTo(tx + tw * f, y + 8); ctx.lineTo(tx + tw * f, rowsBottom); ctx.stroke(); });
-    ctx.setLineDash([]);
+    [['낮음', 0, 0.4], ['보통', 0.4, 0.75], ['높음', 0.75, 1]].forEach(([l, a, b]) =>
+      txt(ctx, l, tx + tw * (a + b) / 2, yy + 38, { px: 38, align: 'center', bold: 0.6 }));
+    const headTop = yy;
+    yy += 54;
+    ctx.beginPath(); handLine(ctx, R, tx - 6, yy, tx + tw + 6, yy, 2, 4); stroke(ctx, 4.5);
+    const rowsTop = yy + 8, rowsBottom = rowsTop + rowH * ORDER.length;
+    crayon(ctx, R, tx + tw * 0.4, rowsTop, tw * 0.35, rowsBottom - rowsTop, C.orange, { alpha: 0.22, gap: 7, lw: 5 });
+    ctx.save(); ctx.setLineDash([12, 12]);
+    [0.4, 0.75].forEach((f) => { ctx.beginPath(); handLine(ctx, R, tx + tw * f, headTop + 6, tx + tw * f, rowsBottom, 2, 3); stroke(ctx, 3); });
+    ctx.restore();
     ORDER.forEach((id, i) => {
-      const t = TYPES[id], s = by[id];
-      const cy = rowsTop + i * rowH + rowH / 2;
-      // 이름
-      ctx.beginPath(); ctx.arc(x0 + 12, cy, 11, 0, Math.PI * 2);
-      ctx.fillStyle = t.color; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = C.black; ctx.stroke();
-      ctx.font = fnt(700, 31); ctx.fillStyle = C.black; ctx.fillText(t.short, x0 + 34, cy + 11);
-      if (id === topId) {
-        const nw = ctx.measureText(t.short).width;
-        ctx.fillStyle = C.orange; ctx.fillRect(x0 + 34, cy + 20, nw, 6);
+      const t = TYPES[id], s = by[id], cy = rowsTop + i * rowH + rowH / 2;
+      crayon(ctx, R, x0, cy - 14, 28, 28, t.color, { round: 14, lw: 5, gap: 4 });
+      ctx.beginPath(); ctx.arc(x0 + 14, cy, 14, 0, Math.PI * 2); stroke(ctx, 3);
+      txt(ctx, t.short, x0 + 42, cy + 15, { px: 44, bold: 0.9 });
+      if (id === top.id) {
+        ctx.font = hf(44); const nw = ctx.measureText(t.short).width;
+        ctx.beginPath(); handLine(ctx, R, x0 + 40, cy + 29, x0 + 44 + nw, cy + 27, 2, 3); stroke(ctx, 7, C.orange);
       }
-      // 축(왼쪽 실선)
-      ctx.lineWidth = 4; ctx.strokeStyle = C.black;
-      ctx.beginPath(); ctx.moveTo(tx, cy - rowH * 0.32); ctx.lineTo(tx, cy + rowH * 0.32); ctx.stroke();
-      // 막대
-      const bw = tw * Math.max(s.score, 2) / 100, bh = Math.min(34, rowH * 0.42), r = bh / 2;
+      ctx.beginPath(); handLine(ctx, R, tx, cy - rowH * 0.34, tx, cy + rowH * 0.34, 1.5, 2); stroke(ctx, 4.5);
+      const bw = tw * Math.max(s.score, 3) / 100, bh = Math.min(42, rowH * 0.5), r = bh / 2;
+      crayon(ctx, R, tx, cy - r, bw, bh, t.color, { round: r, lw: 6, gap: 4.5 });
       ctx.beginPath();
-      ctx.moveTo(tx, cy - bh / 2); ctx.lineTo(tx + bw - r, cy - bh / 2);
-      ctx.arcTo(tx + bw, cy - bh / 2, tx + bw, cy, r); ctx.arcTo(tx + bw, cy + bh / 2, tx + bw - r, cy + bh / 2, r);
-      ctx.lineTo(tx, cy + bh / 2);
-      ctx.fillStyle = t.color; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = C.black; ctx.stroke();
-      // 점수
-      ctx.font = fnt(900, 38); ctx.fillStyle = C.black; ctx.textAlign = 'right';
-      ctx.fillText(String(s.score), x0 + iw, cy + 13); ctx.textAlign = 'left';
+      handLine(ctx, R, tx, cy - r, tx + bw - r, cy - r, 1.5, 3);
+      handLine(ctx, R, tx + bw - r, cy + r, tx, cy + r, 1.5, 3);
+      stroke(ctx, 4);
+      ctx.beginPath(); ctx.arc(tx + bw - r, cy, r, -Math.PI / 2, Math.PI / 2); stroke(ctx, 4);
+      txt(ctx, String(s.score), x0 + iw, cy + 19, { px: 56, bold: 1.5, align: 'right' });
     });
-    return rowsBottom - y;
+    yy = rowsBottom + 34;
+    ctx.beginPath(); handLine(ctx, R, x0, yy, x0 + iw, yy, 2.5, 5); stroke(ctx, 4.5);
+    if (even) {
+      txt(ctx, '다섯 영역이 고르게 나왔어요', x + w / 2, yy + 100, { px: 54, bold: 1.4, align: 'center' });
+    } else {
+      const colX = [x + w * 0.27, x + w * 0.73];
+      ctx.save(); ctx.setLineDash([12, 12]);
+      ctx.beginPath(); handLine(ctx, R, x + w / 2, yy + 24, x + w / 2, yy + 134, 2, 2); stroke(ctx, 3);
+      ctx.restore();
+      [['내가 높은 영역', top], ['내가 낮은 영역', low]].forEach(([lab, s], i) => {
+        txt(ctx, lab, colX[i], yy + 62, { px: 38, color: C.ink, align: 'center' });
+        txt(ctx, `${TYPES[s.id].short} ${s.score}`, colX[i], yy + 124, { px: 56, bold: 1.5, align: 'center' });
+      });
+    }
   }
 
   async function buildImage() {
-    const { by, top, low, even } = lastResult;
+    const res = lastResult;
+    const { top } = res;
     const t = TYPES[top.id];
-    // 웹 글꼴이 다 받아진 뒤에 그리기 (최대 3초 기다림)
-    const sample = [t.name, t.desc, t.authors.join(''), '잇다 독서 취향 테스트 @itda.pages 내가 높은 영역 낮은 영역 추천 방향 분석표 점 보통 높음 낮음 0123456789 다섯 영역이 고르게 나왔어요 나의 독서 취향도 궁금하다면 itdapages.github.io/reader',
-      ORDER.map((id) => TYPES[id].short).join('')].join('');
-    try {
-      await Promise.race([
-        Promise.all([400, 500, 700, 900].map((w) => document.fonts.load(fnt(w, 40), sample))),
-        new Promise((r) => setTimeout(r, 3000)),
-      ]);
-    } catch (_) {}
-    let logo = null;
-    try { logo = await loadImg('../img/logo.webp'); } catch (_) {}
+    // 글꼴이 받아진 뒤에 그리기 (최대 4초 기다림)
+    await Promise.race([loadImgFonts(), new Promise((r) => setTimeout(r, 4000))]);
+    let logo = null, kid = null;
+    try { [logo, kid] = await Promise.all([loadImg('../img/logo.webp'), loadImg('../img/done.webp')]); } catch (_) {}
 
-    const W = 1080, X = 80, CW = W - 160;
+    const W = 1080, X = 74, CW = W - 148;
+    const R = seeded(answers.join('') + top.id);
     const cv = document.createElement('canvas');
     const mctx = cv.getContext('2d');
-    const h1 = topBlock(mctx, X, 0, CW, t, top, false);
-    const y1 = 240, y2 = y1 + h1 + 46;
-    // 1920 높이 안에 들어가도록 막대 줄 높이를 맞춤
-    const rowH = Math.min(100, Math.max(76, (1920 - 150 - 30 - y2 - 120 - 66 - 36 - 150) / ORDER.length));
-    const chartH = 66 + rowH * ORDER.length;
-    const h2 = 120 + chartH + 36 + 150;
-    const yEnd = y2 + h2 + 14;
-    const H = Math.max(1920, Math.ceil(yEnd + 150));
+    const h1 = topCard(mctx, R, X, 0, CW, t, top, false);
+    const y1 = 262, y2 = y1 + h1 + 52;
+    const FOOT = 214;
+    const rowH = Math.min(96, Math.max(60, (1920 - FOOT - y2 - card2Height(0)) / ORDER.length));
+    const h2 = card2Height(rowH);
+    const H = Math.max(1920, Math.ceil(y2 + h2 + FOOT));  // 내용 높이 (넘치면 마지막에 1920으로 줄임)
     cv.width = W; cv.height = H;
     const ctx = cv.getContext('2d');
 
-    ctx.fillStyle = C.cream; ctx.fillRect(0, 0, W, H);
-    // 머리
-    if (logo) ctx.drawImage(logo, X, 76, 140, 140 * 352 / 412);
-    ctx.fillStyle = C.black; ctx.font = fnt(900, 48); ctx.fillText('잇다 독서 취향 테스트', X + 166, 140);
-    ctx.fillStyle = C.ink; ctx.font = fnt(500, 30); ctx.fillText('@itda.pages', X + 166, 188);
+    paper(ctx, R, W, H);
+    // 머리: 얼룩말 + 손글씨 제목 + 크레파스 밑줄
+    if (logo) ctx.drawImage(logo, 60, 58, 160, 160 * 352 / 412);
+    withRot(ctx, 244, 140, -2, () => {
+      ctx.font = hf(74); const tw = ctx.measureText('잇다 독서 취향 테스트').width;
+      ctx.beginPath(); handLine(ctx, R, 244, 166, 244 + tw, 160, 3, 4); stroke(ctx, 12, C.orange);
+      txt(ctx, '잇다 독서 취향 테스트', 244, 148, { px: 74, bold: 1.8 });
+    });
+    txt(ctx, '@itda.pages', 252, 222, { px: 42, color: C.ink });
 
-    // 카드 1: 높은 영역
-    drawCard(ctx, X, y1, CW, h1, t.color);
-    topBlock(ctx, X, y1, CW, t, top, true);
+    withRot(ctx, X + CW / 2, y1 + h1 / 2, -1, () => {
+      handCard(ctx, R, X, y1, CW, h1, t.color);
+      topCard(ctx, R, X, y1, CW, t, top, true);
+    });
+    withRot(ctx, X + CW / 2, y2 + h2 / 2, 0.8, () => {
+      handCard(ctx, R, X, y2, CW, h2, C.black);
+      barsCard(ctx, R, X, y2, CW, rowH, res);
+    });
 
-    // 카드 2: 분석표
-    drawCard(ctx, X, y2, CW, h2, C.black);
-    ctx.fillStyle = C.black; ctx.font = fnt(900, 40); ctx.fillText('독서 취향 분석표', X + 52, y2 + 82);
-    const ch = drawBars(ctx, X + 52, y2 + 120, CW - 104, rowH, by, top.id);
-    // 요약
-    const sy = y2 + 120 + ch + 36;
-    ctx.lineWidth = 4; ctx.strokeStyle = C.black;
-    ctx.beginPath(); ctx.moveTo(X + 52, sy); ctx.lineTo(X + CW - 52, sy); ctx.stroke();
-    ctx.textAlign = 'center';
-    if (even) {
-      ctx.fillStyle = C.black; ctx.font = fnt(900, 36); ctx.fillText('다섯 영역이 고르게 나왔어요', W / 2, sy + 90);
-    } else {
-      const colX = [X + CW * 0.27, X + CW * 0.73];
-      ctx.setLineDash([9, 9]); ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(W / 2, sy + 24); ctx.lineTo(W / 2, sy + 126); ctx.stroke(); ctx.setLineDash([]);
-      [['내가 높은 영역', top], ['내가 낮은 영역', low]].forEach(([lab, s], i) => {
-        ctx.fillStyle = C.ink; ctx.font = fnt(700, 26); ctx.fillText(lab, colX[i], sy + 62);
-        ctx.fillStyle = C.black; ctx.font = fnt(900, 38); ctx.fillText(`${TYPES[s.id].short} ${s.score}`, colX[i], sy + 114);
-      });
+    // 바닥: 손 흔드는 아이 그림 + 주소
+    if (kid) ctx.drawImage(kid, W - 74 - 250, H - 28 - 178, 250, 250 * 399 / 560);
+    txt(ctx, '나의 독서 취향도 궁금하다면', 86, H - 120, { px: 42, color: C.ink });
+    txt(ctx, 'itdapages.github.io/reader', 86, H - 58, { px: 54, bold: 1.5 });
+
+    // 내용이 1920보다 길면 비율을 지켜 1920 안에 줄여 넣기 (양옆은 종이 바탕)
+    let out = cv;
+    if (H > 1920) {
+      out = document.createElement('canvas');
+      out.width = W; out.height = 1920;
+      const octx = out.getContext('2d');
+      paper(octx, R, W, 1920);
+      const sc = 1920 / H;
+      octx.drawImage(cv, (W - W * sc) / 2, 0, W * sc, 1920);
     }
-    // 바닥
-    ctx.fillStyle = C.ink; ctx.font = fnt(500, 30); ctx.fillText('나의 독서 취향도 궁금하다면', W / 2, H - 100);
-    ctx.fillStyle = C.black; ctx.font = fnt(900, 36); ctx.fillText('itdapages.github.io/reader', W / 2, H - 50);
-    ctx.textAlign = 'left';
-
-    return new Promise((res, rej) => cv.toBlob((b) => (b ? res(b) : rej(new Error('toBlob'))), 'image/png'));
+    return new Promise((resolve, reject) => out.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob'))), 'image/png'));
   }
 
   function prepareImage() {
