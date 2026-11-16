@@ -559,7 +559,9 @@
     .filter(([fam]) => fam === 'ItdaHand' || fam === TITLE_FAMILY);
   const HAND = '"ItdaHand", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
   const TITLE = `"${TITLE_FAMILY}", ${HAND}`;
-  const hf = (px, fam = HAND) => `${px}px ${fam}`;
+  const SANS = '"Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
+  const SANS_BOLD = `bold ${SANS}`;  // 고딕체 굵게 (주소)
+  const hf = (px, fam = HAND) => fam === SANS_BOLD ? `700 ${px}px ${SANS}` : `${px}px ${fam}`;
   const C = { black: '#000000', ink: '#4B4845', cream: '#FAF3E8', white: '#FFFFFF', orange: '#F3AD46' };
   let imgJob = null, imgBlob = null, fontsJob = null;
 
@@ -567,7 +569,8 @@
   function loadImgFonts() {
     if (!fontsJob) {
       fontsJob = Promise.all(IMG_FONTS.map(([fam, url]) =>
-        new FontFace(fam, `url(${url})`).load().then((ff) => { document.fonts.add(ff); }).catch(() => {})));
+        new FontFace(fam, `url(${url})`).load().then((ff) => { document.fonts.add(ff); }).catch(() => {}))
+        .concat(document.fonts.load(`700 46px ${SANS}`, 'itdapages.github.io/reader').catch(() => {})));
     }
     return fontsJob;
   }
@@ -636,20 +639,10 @@
       seg(x + w + 4, y + h, x - 5, y + h); seg(x, y + h + 4, x, y - 5);
     }
   }
-  // 크레파스로 칠하기: 비스듬한 획을 촘촘히 긋고, 반대 방향으로 한 번 더 옅게
-  function crayon(ctx, R, x, y, w, h, color, { gap = 5, lw = 6, alpha = 0.85, round = 0 } = {}) {
-    ctx.save();
-    ctx.beginPath(); rr(ctx, x, y, w, h, round); ctx.clip();
-    ctx.strokeStyle = color; ctx.lineCap = 'round';
-    const k = 0.55;
-    [[1, alpha, 1], [-1, alpha * 0.4, 1.8]].forEach(([dir, a, g]) => {
-      for (let i = -h * k - 12; i < w + h * k + 12; i += gap * g) {
-        ctx.globalAlpha = a * (0.65 + R() * 0.35);
-        ctx.lineWidth = lw * (0.7 + R() * 0.6);
-        const x1 = x + i + (R() - 0.5) * 4;
-        ctx.beginPath(); ctx.moveTo(x1, y + h + 6); ctx.lineTo(x1 + dir * h * k + (R() - 0.5) * 4, y - 6); ctx.stroke();
-      }
-    });
+  // 단색으로 칠하기 (round: 모서리 둥글기, alpha: 투명도)
+  function paint(ctx, x, y, w, h, color, { round = 0, alpha = 1 } = {}) {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color;
+    ctx.beginPath(); rr(ctx, x, y, w, h, round); ctx.fill();
     ctx.restore();
   }
   function paper(ctx, R, W, H) {
@@ -660,7 +653,7 @@
     }
   }
   function handCard(ctx, R, x, y, w, h, shadow) {
-    crayon(ctx, R, x + 16, y + 18, w, h, shadow, { round: 18, alpha: 0.95, lw: 7, gap: 5 });
+    paint(ctx, x + 14, y + 16, w, h, shadow, { round: 16 });
     ctx.fillStyle = C.white; ctx.beginPath(); rr(ctx, x, y, w, h, 16); ctx.fill();
     handRect(ctx, R, x, y, w, h, { lw: 5.5, j: 3 });
   }
@@ -672,7 +665,7 @@
     ctx.font = hf(40);
     const pw = ctx.measureText('내가 높은 영역').width + 50, ph = 66;
     if (draw) {
-      crayon(ctx, R, x0, yy, pw, ph, t.color, { round: 18 });
+      paint(ctx, x0, yy, pw, ph, t.color, { round: 14 });
       handRect(ctx, R, x0, yy, pw, ph, { lw: 4, j: 2 });
       txt(ctx, '내가 높은 영역', x0 + 25, yy + 47, { px: 40, bold: 0.8 });
       ctx.font = hf(40);
@@ -691,7 +684,7 @@
       if (draw) {
         ctx.font = hf(fs, TITLE);
         const lw = ctx.measureText(ln).width;
-        crayon(ctx, R, x0 - 10, base - fs * 0.24, lw + 20, fs * 0.36, t.color, { round: fs * 0.21, alpha: 0.75, lw: 7 });
+        paint(ctx, x0 - 6, base - fs * 0.24, lw + 12, fs * 0.34, t.color, { round: 4 });
         txt(ctx, ln, x0, base, { px: fs, fam: TITLE, bold: 1.8 });
       }
       yy += lh;
@@ -737,13 +730,13 @@
     yy += 54;
     ctx.beginPath(); handLine(ctx, R, tx - 6, yy, tx + tw + 6, yy, 2, 4); stroke(ctx, 4.5);
     const rowsTop = yy + 8, rowsBottom = rowsTop + rowH * ORDER.length;
-    crayon(ctx, R, tx + tw * 0.4, rowsTop, tw * 0.35, rowsBottom - rowsTop, C.orange, { alpha: 0.22, gap: 7, lw: 5 });
+    paint(ctx, tx + tw * 0.4, rowsTop, tw * 0.35, rowsBottom - rowsTop, C.orange, { alpha: 0.18 });
     ctx.save(); ctx.setLineDash([12, 12]);
     [0.4, 0.75].forEach((f) => { ctx.beginPath(); handLine(ctx, R, tx + tw * f, headTop + 6, tx + tw * f, rowsBottom, 2, 3); stroke(ctx, 3); });
     ctx.restore();
     ORDER.forEach((id, i) => {
       const t = TYPES[id], s = by[id], cy = rowsTop + i * rowH + rowH / 2;
-      crayon(ctx, R, x0, cy - 14, 28, 28, t.color, { round: 14, lw: 5, gap: 4 });
+      paint(ctx, x0, cy - 14, 28, 28, t.color, { round: 14 });
       ctx.beginPath(); ctx.arc(x0 + 14, cy, 14, 0, Math.PI * 2); stroke(ctx, 3);
       txt(ctx, t.short, x0 + 42, cy + 15, { px: 44, bold: 0.9 });
       if (id === top.id) {
@@ -752,7 +745,8 @@
       }
       ctx.beginPath(); handLine(ctx, R, tx, cy - rowH * 0.34, tx, cy + rowH * 0.34, 1.5, 2); stroke(ctx, 4.5);
       const bw = tw * Math.max(s.score, 3) / 100, bh = Math.min(42, rowH * 0.5), r = bh / 2;
-      crayon(ctx, R, tx, cy - r, bw, bh, t.color, { round: r, lw: 6, gap: 4.5 });
+      ctx.beginPath(); ctx.moveTo(tx, cy - r); ctx.lineTo(tx + bw - r, cy - r); ctx.arc(tx + bw - r, cy, r, -Math.PI / 2, Math.PI / 2); ctx.lineTo(tx, cy + r); ctx.closePath();
+      ctx.fillStyle = t.color; ctx.fill();
       ctx.beginPath();
       handLine(ctx, R, tx, cy - r, tx + bw - r, cy - r, 1.5, 3);
       handLine(ctx, R, tx + bw - r, cy + r, tx, cy + r, 1.5, 3);
@@ -820,7 +814,7 @@
     // 바닥: 손 흔드는 아이 그림 + 주소
     if (kid) ctx.drawImage(kid, W - 74 - 250, H - 28 - 178, 250, 250 * 399 / 560);
     txt(ctx, '나의 독서 취향도 궁금하다면', 86, H - 120, { px: 42, color: C.ink });
-    txt(ctx, 'itdapages.github.io/reader', 86, H - 58, { px: 54, bold: 1.5 });
+    txt(ctx, 'itdapages.github.io/reader', 86, H - 58, { px: 46, fam: SANS_BOLD });
 
     // 내용이 1920보다 길면 비율을 지켜 1920 안에 줄여 넣기 (양옆은 종이 바탕)
     let out = cv;
