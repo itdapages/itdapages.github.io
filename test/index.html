@@ -103,8 +103,7 @@
   .progress { height: 18px; border: 2.5px solid var(--black); border-radius: var(--wobble); background: var(--white); overflow: hidden; }
   .progress i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(-55deg, var(--black) 0 7px, var(--cream) 7px 14px); transition: width .35s ease; }
   .qcard { margin-top: 24px; padding: 22px 20px 22px; }
-  .qsec { display: inline-block; font-size: 12.5px; font-weight: 700; padding: 4px 11px; border: 2px solid var(--black); border-radius: var(--wobble); background: var(--cream); }
-  .qnum { display: block; font-size: 15px; font-weight: 900; color: var(--orange); -webkit-text-stroke: .4px var(--black); margin-top: 16px; letter-spacing: .02em; }
+  .qnum { display: block; font-size: 15px; font-weight: 900; color: var(--orange); -webkit-text-stroke: .4px var(--black); letter-spacing: .02em; }
   .qtext { font-size: 19px; font-weight: 700; line-height: 1.6; letter-spacing: -0.02em; margin: 4px 0 22px; min-height: 3.2em; outline: none; }
   .opts { display: grid; gap: 10px; list-style: none; }
   .opt {
@@ -149,29 +148,41 @@
   .sheet { margin-top: 30px; padding: 20px 18px 18px; }
   .sheet h2 { font-size: 19px; font-weight: 900; letter-spacing: -0.02em; }
   .sheet .sub { font-size: 13px; color: var(--ink); margin-top: 2px; }
-  .grid { margin-top: 16px; display: grid; grid-template-columns: 84px 1fr 32px; column-gap: 10px; row-gap: 14px; align-items: center; }
-  .grid .zones { grid-column: 2; display: grid; grid-template-columns: 40fr 35fr 25fr; font-size: 12px; font-weight: 700; text-align: center; border-bottom: 2px solid var(--black); padding-bottom: 4px; }
-  .grid .zones span + span { border-left: 1.5px dashed var(--black); }
-  .rname { font-size: 13.5px; font-weight: 700; line-height: 1.3; display: flex; align-items: center; gap: 6px; }
-  .rname i { width: 10px; height: 10px; flex: none; border-radius: 50%; border: 1.5px solid var(--black); background: var(--c); }
-  .track {
-    position: relative; height: 24px; border-left: 2px solid var(--black);
-    background: linear-gradient(90deg, transparent 40%, rgba(243,173,70,.18) 40%, rgba(243,173,70,.18) 75%, transparent 75%);
-  }
-  .track::before, .track::after { content: ""; position: absolute; top: -7px; bottom: -7px; border-left: 1.5px dashed var(--black); }
-  .track::before { left: 40%; }
-  .track::after { left: 75%; }
-  .track .bar { position: absolute; left: 0; top: 4px; bottom: 4px; width: 0; z-index: 1; background: var(--c); border: 2px solid var(--black); border-left-width: 0; border-radius: 0 8px 8px 0; transition: width .8s cubic-bezier(.2,.7,.2,1); }
-  .rscore { font-size: 15px; font-weight: 900; text-align: right; font-variant-numeric: tabular-nums; }
-  .rname.row-top { text-decoration: underline 3px var(--orange); text-underline-offset: 4px; }
-  .sheet .legend { font-size: 12px; color: var(--ink); margin-top: 16px; line-height: 1.6; }
+  /* 방사형 그래프 */
+  .radar { display: block; width: 100%; max-width: 400px; height: auto; margin: 10px auto 0; overflow: visible; }
+  .radar .ring { fill: none; stroke: var(--black); stroke-width: 1.2; stroke-dasharray: 4 4; opacity: .55; }
+  .radar .ring.outer { stroke-width: 2; stroke-dasharray: none; opacity: 1; }
+  .radar .band { fill: rgba(243,173,70,.16); fill-rule: evenodd; }
+  .radar .spoke { stroke: var(--black); stroke-width: 1; opacity: .3; }
+  .radar .area { fill: rgba(243,173,70,.55); stroke: var(--black); stroke-width: 2.5; stroke-linejoin: round;
+                 transform-box: view-box; transform-origin: var(--ox) var(--oy); transform: scale(0); transition: transform .8s cubic-bezier(.2,.7,.2,1); }
+  .radar.on .area { transform: scale(1); }
+  .radar .pt { fill: var(--black); stroke: var(--white); stroke-width: 2; }
+  .radar .pt-hit { fill: transparent; cursor: default; }
+  .radar .lab { font-family: var(--sans); font-size: 14px; font-weight: 700; fill: var(--black); }
+  .radar .lab .sc { font-size: 17px; font-weight: 900; }
+  .radar .lab .lv { font-size: 12px; font-weight: 500; fill: var(--ink); }
+  .radar .lab.top-type .nm { text-decoration: underline; text-decoration-color: var(--orange); text-decoration-thickness: 3px; }
+  .sheet .legend { font-size: 12px; color: var(--ink); margin-top: 10px; line-height: 1.6; }
+  .sheet .legend i { display: inline-block; width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px; border: 1.5px dashed rgba(0,0,0,.6); background: rgba(243,173,70,.16); }
   .summary { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--black); margin-top: 16px; }
   .summary div { padding: 10px 4px 0; text-align: center; }
   .summary div + div { border-left: 1.5px dashed var(--black); }
   .summary dt { font-size: 12px; font-weight: 700; color: var(--ink); }
   .summary dd { font-size: 15px; font-weight: 900; line-height: 1.4; margin-top: 2px; }
 
-  .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 34px 0 6px; }
+  .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 16px 0 6px; }
+  .ctas.share-row { margin-top: 34px; gap: 10px; flex-wrap: nowrap; }
+  .share-row .btn { flex: 1 1 0; max-width: 240px; min-width: 0; padding: 12px 10px; font-size: 14.5px; gap: 6px; }
+  #result-t:focus, .qtext:focus { outline: none; }
+  .btn[aria-busy="true"] { opacity: .7; cursor: progress; }
+
+  .modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 18px; background: rgba(0,0,0,.55); }
+  .modal-box { width: min(100%, 420px); max-height: calc(100vh - 36px); overflow: auto; padding: 18px 18px 16px; text-align: center; }
+  .modal-t { font-size: 17px; font-weight: 900; }
+  .modal-box img { width: 100%; max-height: 62vh; object-fit: contain; margin: 12px auto 0; border: 2px solid var(--black); border-radius: 10px; -webkit-touch-callout: default; }
+  .modal-hint { font-size: 13.5px; color: var(--ink); margin-top: 10px; }
+  .modal-hint b { color: var(--black); }
   .shared-note { text-align: center; font-size: 13px; color: var(--ink); margin-top: 10px; }
 
   .toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--black); color: var(--cream); font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: var(--wobble); transition: opacity .2s ease, transform .2s ease; z-index: 10; }
@@ -189,7 +200,6 @@
     .qtext { font-size: 21px; }
     .r-head h1 { font-size: 36px; }
     .type-name { font-size: 30px; }
-    .grid { grid-template-columns: 100px 1fr 36px; }
   }
 </style>
 </head>
@@ -232,7 +242,6 @@
         <div class="progress" role="progressbar" aria-label="진행률" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" id="progress"><i></i></div>
 
         <div class="card qcard" id="qcard">
-          <span class="qsec" id="qsec"></span>
           <span class="qnum" id="qnum"></span>
           <p class="qtext" id="qtext" tabindex="-1"></p>
           <ul class="opts" id="opts"></ul>
@@ -253,16 +262,25 @@
         <article class="card sheet" aria-labelledby="sheet-t">
           <h2 id="sheet-t">독서 취향 분석표</h2>
           <p class="sub">영역마다 해당 문항의 평균을 100점으로 바꿨어요</p>
-          <div class="grid" id="grid"></div>
+          <div id="radar"></div>
           <dl class="summary" id="summary"></dl>
-          <p class="legend">낮음 0~39 · 보통 40~74 · 높음 75~100<br>점수가 높을수록 그 방향의 작품에 끌리는 편이에요.</p>
+          <p class="legend"><i aria-hidden="true"></i>안쪽 점선 안은 낮음(0~39), 두 점선 사이는 보통(40~74), 바깥 점선 밖은 높음(75~100)이에요.<br>점수가 높을수록 그 방향의 작품에 끌리는 편이에요.</p>
         </article>
 
         <article class="card type-card" id="low-card"></article>
 
+        <div class="ctas share-row">
+          <button class="btn dark" type="button" id="share-img">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            이미지로 공유하기
+          </button>
+          <button class="btn" type="button" id="share">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+            링크 공유하기
+          </button>
+        </div>
         <div class="ctas">
-          <a class="btn dark" href="../#join" id="join-btn">잇다와 함께 읽기</a>
-          <button class="btn" type="button" id="share">결과 공유하기</button>
+          <a class="btn" href="../#join" id="join-btn">잇다와 함께 읽기</a>
           <button class="btn" type="button" id="retry">다시 하기</button>
         </div>
         <p class="shared-note" id="shared-note" hidden>링크로 열어 본 결과예요. 나의 독서 취향도 알아볼까요?</p>
@@ -277,6 +295,19 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- 공유창을 열 수 없는 곳(인스타 앱 안 브라우저, PC 등)에서 이미지를 저장하는 창 -->
+  <div class="modal" id="img-modal" role="dialog" aria-modal="true" aria-labelledby="img-modal-t" hidden>
+    <div class="modal-box card">
+      <p class="modal-t" id="img-modal-t">결과 이미지</p>
+      <img id="img-preview" alt="나의 독서 취향 결과 이미지">
+      <p class="modal-hint">휴대폰에서는 이미지를 <b>길게 눌러</b> 저장하거나 공유하세요.</p>
+      <div class="ctas">
+        <a class="btn dark" id="img-download" download="itda-독서취향.png">이미지 저장</a>
+        <button class="btn" type="button" id="img-close">닫기</button>
+      </div>
+    </div>
+  </div>
 
   <noscript><p style="text-align:center;padding:20px">테스트는 자바스크립트를 켜야 할 수 있어요.</p></noscript>
 
@@ -302,14 +333,9 @@
   };
   const ORDER = ['form', 'irony', 'relation', 'society', 'world'];
 
-  /* ───── 문항 (sec: 질문지의 묶음, type: 점수가 들어가는 독자 유형) ───── */
-  const SECTIONS = {
-    A: '책을 선택하는 기준',
-    B: '문체와 서사의 취향',
-    C: '감정과 인물을 이해하는 방식',
-    D: '현실과 세계를 바라보는 방식',
-    E: '독서 경험과 발견',
-  };
+  /* ───── 문항 (sec: 질문지의 묶음 A 책을 선택하는 기준 · B 문체와 서사의 취향 · C 감정과 인물을 이해하는 방식
+                     · D 현실과 세계를 바라보는 방식 · E 독서 경험과 발견 — 화면에는 표시하지 않음
+                type: 점수가 들어가는 독자 유형) ───── */
   const QUESTIONS = [
     { sec: 'A', type: 'form',     text: '나는 책을 읽을 때 등단한 작가나 문학상을 수상한 작가의 작품을 찾아 읽는 편이다.' },
     { sec: 'A', type: 'irony',    text: '나는 책을 고를 때 다른 사람들의 평점이나 리뷰보다 작품 자체에 더 관심을 둔다.' },
@@ -337,7 +363,14 @@
     { sec: 'E', type: 'world',    text: '나는 책을 통해 다른 사람의 삶과 내가 살아보지 못한 세계를 경험하고 싶다.' },
     { sec: 'E', type: 'relation', text: '나는 작품을 읽고 나서 다른 사람과 해석이나 감상을 나누는 것을 좋아한다.' },
   ];
-  const CHOICES = ['전혀 그렇지 않다', '그렇지 않은 편이다', '보통이다', '그런 편이다', '매우 그렇다'];
+  // 화면에는 긍정이 위로 오도록 나열 (v = 점수)
+  const CHOICES = [
+    { v: 5, label: '매우 그렇다' },
+    { v: 4, label: '그런 편이다' },
+    { v: 3, label: '보통이다' },
+    { v: 2, label: '그렇지 않은 편이다' },
+    { v: 1, label: '전혀 그렇지 않다' },
+  ];
   const N = QUESTIONS.length;
 
   /* ───── 상태 ───── */
@@ -363,14 +396,13 @@
   function renderQuestion(animate) {
     const q = QUESTIONS[idx];
     $('qi').textContent = idx + 1;
-    $('qsec').textContent = `${q.sec} · ${SECTIONS[q.sec]}`;
     $('qnum').textContent = `Q${idx + 1}`;
     $('qtext').textContent = q.text;
     const done = answers.filter(Boolean).length;
     $('progress').firstElementChild.style.width = `${(idx / N) * 100}%`;
     $('progress').setAttribute('aria-valuenow', String(done));
-    $('opts').innerHTML = CHOICES.map((c, i) =>
-      `<li><button class="opt" type="button" data-v="${i + 1}" aria-pressed="${answers[idx] === i + 1}"><span class="dot" aria-hidden="true"></span>${c}</button></li>`).join('');
+    $('opts').innerHTML = CHOICES.map((c) =>
+      `<li><button class="opt" type="button" data-v="${c.v}" aria-pressed="${answers[idx] === c.v}"><span class="dot" aria-hidden="true"></span>${c.label}</button></li>`).join('');
     const card = $('qcard');
     if (animate) { card.classList.remove('enter'); void card.offsetWidth; card.classList.add('enter'); }
     $('qtext').focus({ preventScroll: true });
@@ -394,7 +426,8 @@
   });
   document.addEventListener('keydown', (e) => {
     if (screens.quiz.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
-    if (/^[1-5]$/.test(e.key)) { e.preventDefault(); answer(+e.key); }
+    // 숫자 키는 화면 순서대로: 1 = 맨 위(매우 그렇다) … 5 = 맨 아래(전혀 그렇지 않다)
+    if (/^[1-5]$/.test(e.key)) { e.preventDefault(); answer(CHOICES[+e.key - 1].v); }
     else if (e.key === 'Backspace') { e.preventDefault(); goBack(); }
   });
 
@@ -456,6 +489,52 @@
     };
   }
 
+  /* 방사형 그래프: 꼭짓점 5개 = 유형 5개(위에서부터 시계 방향), 안쪽 점선 40 · 바깥 점선 75 · 테두리 100 */
+  function radarSVG(by, topId) {
+    const W = 340, H = 330, cx = 170, cy = 178, R = 105, GAP = 14;
+    const ang = ORDER.map((_, i) => (-90 + i * 72) * Math.PI / 180);
+    const pt = (i, f) => [cx + Math.cos(ang[i]) * R * f, cy + Math.sin(ang[i]) * R * f];
+    const poly = (f) => ORDER.map((_, i) => pt(i, f).map((n) => n.toFixed(1)).join(',')).join(' ');
+    const ring = (f) => `M${poly(f).replace(/ /g, 'L')}Z`;
+
+    const spokes = ORDER.map((_, i) => { const [x, y] = pt(i, 1); return `<line class="spoke" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }).join('');
+    const vals = ORDER.map((id) => Math.max(by[id].score, 2) / 100);
+    const area = vals.map((f, i) => pt(i, f).map((n) => n.toFixed(1)).join(',')).join(' ');
+
+    const dots = ORDER.map((id, i) => {
+      const [x, y] = pt(i, vals[i]);
+      const s = by[id];
+      const isTop = id === topId;
+      return `<g><title>${esc(TYPES[id].short)} ${s.score}점 · ${level(s.score)}</title>
+        <circle class="pt-hit" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="16"/>
+        <circle class="pt" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${isTop ? 7 : 5}"${isTop ? ' style="fill:var(--orange);stroke:var(--black);stroke-width:2.5"' : ''}/></g>`;
+    }).join('');
+
+    const labels = ORDER.map((id, i) => {
+      const c = Math.cos(ang[i]), s = Math.sin(ang[i]);
+      const x = cx + c * (R + GAP), y = cy + s * (R + GAP);
+      const anchor = Math.abs(c) < 0.2 ? 'middle' : c > 0 ? 'start' : 'end';
+      const [l1, l2] = TYPES[id].short.split(' ');
+      const blockH = 17 + 17 + 21;
+      const top = s < -0.9 ? y - blockH : s > 0.5 ? y - 6 : y - blockH / 2;
+      const sc = by[id];
+      return `<text class="lab" text-anchor="${anchor}" x="${x.toFixed(1)}" y="${(top + 13).toFixed(1)}">
+        <tspan x="${x.toFixed(1)}">${esc(l1)}</tspan><tspan x="${x.toFixed(1)}" dy="17">${esc(l2 || '')}</tspan><tspan class="sc" x="${x.toFixed(1)}" dy="21">${sc.score}</tspan><tspan class="lv" dx="3">${level(sc.score)}</tspan></text>`;
+    }).join('');
+
+    const aria = '독서 취향 방사형 그래프. ' + ORDER.map((id) => `${TYPES[id].short} ${by[id].score}점 ${level(by[id].score)}`).join(', ');
+    return `<svg class="radar" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(aria)}" style="--ox:${cx}px;--oy:${cy}px">
+      <path class="band" d="${ring(0.75)} ${ring(0.4)}"/>
+      ${spokes}
+      <polygon class="ring" points="${poly(0.4)}"/>
+      <polygon class="ring" points="${poly(0.75)}"/>
+      <polygon class="ring outer" points="${poly(1)}"/>
+      <polygon class="area" points="${area}"/>
+      ${dots}
+      ${labels}
+    </svg>`;
+  }
+
   function renderResult(ans, { secs, shared }) {
     const { by, ranked } = scoreAll(ans);
     const top = ranked[0];
@@ -476,15 +555,8 @@
     $('top-card').setAttribute('style', tc.style);
     $('top-card').innerHTML = tc.html;
 
-    // 분석표
-    $('grid').innerHTML =
-      `<span></span><div class="zones" aria-hidden="true"><span>낮음</span><span>보통</span><span>높음</span></div><span></span>` +
-      ORDER.map((id) => {
-        const t = TYPES[id], s = by[id];
-        return `<div class="rname${id === top.id ? ' row-top' : ''}" style="--c:${t.color}"><i></i>${esc(t.short)}</div>
-          <div class="track" style="--c:${t.color}" role="img" aria-label="${esc(t.short)} ${s.score}점, ${level(s.score)}"><span class="bar${s.score < 4 ? ' min' : ''}" data-w="${Math.max(s.score, 2)}"></span></div>
-          <div class="rscore">${s.score}</div>`;
-      }).join('');
+    // 분석표 (방사형 그래프)
+    $('radar').innerHTML = radarSVG(by, top.id);
     $('summary').innerHTML = even
       ? `<div style="grid-column:1/-1"><dt>영역 균형</dt><dd>다섯 영역이 고르게 나왔어요</dd></div>`
       : `<div><dt>내가 높은 영역</dt><dd>${esc(TYPES[top.id].short)} ${top.score}</dd></div><div><dt>내가 낮은 영역</dt><dd>${esc(TYPES[low.id].short)} ${low.score}</dd></div>`;
@@ -504,16 +576,273 @@
     $('shared-note').hidden = !shared;
     $('retry').textContent = shared ? '나도 해 보기' : '다시 하기';
     $('retry').classList.toggle('dark', shared);
-    $('join-btn').classList.toggle('dark', !shared);
 
     show('result');
     $('result-t').focus({ preventScroll: true });
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      $('grid').querySelectorAll('.bar').forEach((b) => { b.style.width = `${b.dataset.w}%`; });
+      const svg = $('radar').querySelector('.radar');
+      if (svg) svg.classList.add('on');
     }));
     lastTop = topT;
+    lastResult = { by, top, low, even };
+    prepareImage();
   }
   let lastTop = null;
+  let lastResult = null;
+
+  /* ───── 결과 이미지 (1080×1920, 인스타 스토리 비율) ───── */
+  const FONT = '"Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
+  const fnt = (w, px) => `${w} ${px}px ${FONT}`;
+  const C = { black: '#000000', ink: '#4B4845', cream: '#FAF3E8', white: '#FFFFFF', orange: '#F3AD46' };
+  let imgJob = null, imgBlob = null;
+
+  const loadImg = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+  function rr(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+  function wrapText(ctx, text, maxW) {
+    const lines = []; let line = '';
+    for (const w of text.split(' ')) {
+      const t = line ? `${line} ${w}` : w;
+      if (ctx.measureText(t).width <= maxW) { line = t; continue; }
+      if (line) lines.push(line);
+      if (ctx.measureText(w).width <= maxW) { line = w; continue; }
+      line = '';
+      for (const ch of w) { if (ctx.measureText(line + ch).width > maxW) { lines.push(line); line = ch; } else line += ch; }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+  function drawCard(ctx, x, y, w, h, shadow) {
+    ctx.fillStyle = shadow; rr(ctx, x + 14, y + 14, w, h, 28); ctx.fill();
+    ctx.fillStyle = C.white; rr(ctx, x, y, w, h, 28); ctx.fill();
+    ctx.lineWidth = 6; ctx.strokeStyle = C.black; ctx.stroke();
+  }
+  function drawPill(ctx, x, y, text, bg) {
+    ctx.font = fnt(700, 30);
+    const w = ctx.measureText(text).width + 44, h = 58;
+    ctx.fillStyle = bg; rr(ctx, x, y, w, h, 14); ctx.fill();
+    ctx.lineWidth = 4; ctx.strokeStyle = C.black; ctx.stroke();
+    ctx.fillStyle = C.black; ctx.textBaseline = 'middle'; ctx.fillText(text, x + 22, y + h / 2 + 1); ctx.textBaseline = 'alphabetic';
+    return h;
+  }
+
+  // 높은 영역 카드 내용. draw=false면 높이만 계산
+  function topBlock(ctx, x, y, w, t, s, draw) {
+    const x0 = x + 52, iw = w - 104;
+    let yy = y + 50;
+    if (draw) {
+      const ph = drawPill(ctx, x0, yy, '내가 높은 영역', t.color);
+      ctx.textAlign = 'right';
+      ctx.font = fnt(500, 28); ctx.fillStyle = C.ink;
+      const suf = `점 · ${level(s.score)}`;
+      ctx.fillText(suf, x + w - 52, yy + ph / 2 + 12);
+      const sw = ctx.measureText(suf).width;
+      ctx.font = fnt(900, 44); ctx.fillStyle = C.black;
+      ctx.fillText(String(s.score), x + w - 52 - sw - 4, yy + ph / 2 + 14);
+      ctx.textAlign = 'left';
+    }
+    yy += 58 + 34;
+    // 유형 이름: 두 줄 안에 들어가도록 글자 크기 조절
+    let fs = 66, lines;
+    do { ctx.font = fnt(900, fs); lines = wrapText(ctx, t.name, iw); fs -= 2; } while (lines.length > 2 && fs > 44);
+    fs += 2;
+    const lh = Math.round(fs * 1.32);
+    lines.forEach((ln) => {
+      const base = yy + fs;
+      if (draw) {
+        ctx.font = fnt(900, fs);
+        const lw = ctx.measureText(ln).width;
+        ctx.fillStyle = t.color; ctx.fillRect(x0 - 4, base - fs * 0.26, lw + 8, fs * 0.34);
+        ctx.fillStyle = C.black; ctx.fillText(ln, x0, base);
+      }
+      yy += lh;
+    });
+    yy += 8;
+    ctx.font = fnt(400, 34);
+    wrapText(ctx, t.desc, iw).forEach((ln) => { if (draw) { ctx.fillStyle = C.black; ctx.fillText(ln, x0, yy + 36); } yy += 54; });
+    yy += 24;
+    if (draw) { ctx.font = fnt(700, 28); ctx.fillStyle = C.ink; ctx.fillText('추천 방향', x0, yy + 28); }
+    yy += 28 + 20;
+    // 작가 칩
+    ctx.font = fnt(700, 32);
+    let cxp = x0; const chH = 66, gap = 14;
+    t.authors.forEach((a) => {
+      const cw = ctx.measureText(a).width + 52;
+      if (cxp + cw > x0 + iw) { cxp = x0; yy += chH + gap; }
+      if (draw) {
+        ctx.fillStyle = C.cream; rr(ctx, cxp, yy, cw, chH, 12); ctx.fill();
+        ctx.lineWidth = 4; ctx.strokeStyle = C.black; ctx.stroke();
+        ctx.fillStyle = C.black; ctx.textBaseline = 'middle'; ctx.fillText(a, cxp + 26, yy + chH / 2 + 1); ctx.textBaseline = 'alphabetic';
+      }
+      cxp += cw + gap;
+    });
+    yy += chH + 50;
+    return yy - y;
+  }
+
+  // 방사형 그래프 (화면의 그래프와 같은 모양을 k배로)
+  function drawRadar(ctx, cx, cy, k, by, topId) {
+    const R = 105 * k, GAP = 14 * k;
+    const ang = ORDER.map((_, i) => (-90 + i * 72) * Math.PI / 180);
+    const pt = (i, f) => [cx + Math.cos(ang[i]) * R * f, cy + Math.sin(ang[i]) * R * f];
+    const path = (f) => { ORDER.forEach((_, i) => { const [x, y] = pt(i, f); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); };
+    // 보통 구간
+    ctx.beginPath(); path(0.75); path(0.4);
+    ctx.fillStyle = 'rgba(243,173,70,.16)'; ctx.fill('evenodd');
+    // 축
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(0,0,0,.3)';
+    ORDER.forEach((_, i) => { const [x, y] = pt(i, 1); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y); ctx.stroke(); });
+    // 점선 기준선
+    ctx.setLineDash([9, 9]); ctx.lineWidth = 2.4; ctx.strokeStyle = 'rgba(0,0,0,.55)';
+    [0.4, 0.75].forEach((f) => { ctx.beginPath(); path(f); ctx.stroke(); });
+    ctx.setLineDash([]);
+    ctx.lineWidth = 4; ctx.strokeStyle = C.black; ctx.beginPath(); path(1); ctx.stroke();
+    // 내 점수
+    const vals = ORDER.map((id) => Math.max(by[id].score, 2) / 100);
+    ctx.beginPath(); vals.forEach((f, i) => { const [x, y] = pt(i, f); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath();
+    ctx.fillStyle = 'rgba(243,173,70,.55)'; ctx.fill();
+    ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.strokeStyle = C.black; ctx.stroke();
+    ORDER.forEach((id, i) => {
+      const [x, y] = pt(i, vals[i]); const isTop = id === topId;
+      ctx.beginPath(); ctx.arc(x, y, isTop ? 15 : 11, 0, Math.PI * 2);
+      ctx.fillStyle = isTop ? C.orange : C.black; ctx.fill();
+      ctx.lineWidth = isTop ? 5 : 4; ctx.strokeStyle = isTop ? C.black : C.white; ctx.stroke();
+    });
+    // 이름 · 점수
+    ORDER.forEach((id, i) => {
+      const c = Math.cos(ang[i]), s = Math.sin(ang[i]);
+      const x = cx + c * (R + GAP), y = cy + s * (R + GAP);
+      ctx.textAlign = Math.abs(c) < 0.2 ? 'center' : c > 0 ? 'left' : 'right';
+      const blockH = (17 + 17 + 21) * k;
+      const top = s < -0.9 ? y - blockH : s > 0.5 ? y - 6 * k : y - blockH / 2;
+      const [l1, l2] = TYPES[id].short.split(' ');
+      ctx.fillStyle = C.black; ctx.font = fnt(700, 14 * k);
+      ctx.fillText(l1, x, top + 13 * k);
+      ctx.fillText(l2 || '', x, top + 30 * k);
+      const sc = String(by[id].score), lv = level(by[id].score);
+      ctx.font = fnt(900, 17 * k); const scW = ctx.measureText(sc).width;
+      ctx.font = fnt(500, 12 * k); const lvW = ctx.measureText(lv).width;
+      const total = scW + 4 * k + lvW;
+      const startX = ctx.textAlign === 'center' ? x - total / 2 : ctx.textAlign === 'left' ? x : x - total;
+      ctx.textAlign = 'left';
+      ctx.font = fnt(900, 17 * k); ctx.fillText(sc, startX, top + 51 * k);
+      ctx.font = fnt(500, 12 * k); ctx.fillStyle = C.ink; ctx.fillText(lv, startX + scW + 4 * k, top + 51 * k);
+    });
+    ctx.textAlign = 'left'; ctx.lineJoin = 'miter';
+  }
+
+  async function buildImage() {
+    const { by, top, low, even } = lastResult;
+    const t = TYPES[top.id];
+    // 웹 글꼴이 다 받아진 뒤에 그리기 (최대 3초 기다림)
+    const sample = [t.name, t.desc, t.authors.join(''), '잇다 독서 취향 테스트 @itda.pages 내가 높은 영역 낮은 영역 추천 방향 분석표 점 보통 높음 낮음 0123456789 다섯 영역이 고르게 나왔어요 나의 독서 취향도 궁금하다면 itdapages.github.io/test',
+      ORDER.map((id) => TYPES[id].short).join('')].join('');
+    try {
+      await Promise.race([
+        Promise.all([400, 500, 700, 900].map((w) => document.fonts.load(fnt(w, 40), sample))),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (_) {}
+    let logo = null;
+    try { logo = await loadImg('../img/logo.webp'); } catch (_) {}
+
+    const W = 1080, X = 80, CW = W - 160;
+    const cv = document.createElement('canvas');
+    const mctx = cv.getContext('2d');
+    const h1 = topBlock(mctx, X, 0, CW, t, top, false);
+    const y1 = 240, y2 = y1 + h1 + 46;
+    // 1920 높이 안에 들어가도록 그래프 크기(k)를 맞춤
+    const perK = (105 + 14 + 55) + (0.809 * (105 + 14) + 49);
+    const k = Math.min(2.0, Math.max(1.5, (1920 - 150 - y2 - 290) / perK));
+    const radarAbove = (105 + 14) * k + 55 * k, radarBelow = 0.809 * (105 + 14) * k + 49 * k;
+    const h2 = 100 + radarAbove + radarBelow + 40 + 150;
+    const yEnd = y2 + h2 + 14;
+    const H = Math.max(1920, Math.ceil(yEnd + 150));
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d');
+
+    ctx.fillStyle = C.cream; ctx.fillRect(0, 0, W, H);
+    // 머리
+    if (logo) ctx.drawImage(logo, X, 76, 140, 140 * 352 / 412);
+    ctx.fillStyle = C.black; ctx.font = fnt(900, 48); ctx.fillText('잇다 독서 취향 테스트', X + 166, 140);
+    ctx.fillStyle = C.ink; ctx.font = fnt(500, 30); ctx.fillText('@itda.pages', X + 166, 188);
+
+    // 카드 1: 높은 영역
+    drawCard(ctx, X, y1, CW, h1, t.color);
+    topBlock(ctx, X, y1, CW, t, top, true);
+
+    // 카드 2: 분석표
+    drawCard(ctx, X, y2, CW, h2, C.black);
+    ctx.fillStyle = C.black; ctx.font = fnt(900, 40); ctx.fillText('독서 취향 분석표', X + 52, y2 + 82);
+    const rcy = y2 + 100 + radarAbove;
+    drawRadar(ctx, W / 2, rcy, k, by, top.id);
+    // 요약
+    const sy = rcy + radarBelow + 40;
+    ctx.lineWidth = 4; ctx.strokeStyle = C.black;
+    ctx.beginPath(); ctx.moveTo(X + 52, sy); ctx.lineTo(X + CW - 52, sy); ctx.stroke();
+    ctx.textAlign = 'center';
+    if (even) {
+      ctx.fillStyle = C.black; ctx.font = fnt(900, 36); ctx.fillText('다섯 영역이 고르게 나왔어요', W / 2, sy + 90);
+    } else {
+      const colX = [X + CW * 0.27, X + CW * 0.73];
+      ctx.setLineDash([9, 9]); ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(W / 2, sy + 24); ctx.lineTo(W / 2, sy + 126); ctx.stroke(); ctx.setLineDash([]);
+      [['내가 높은 영역', top], ['내가 낮은 영역', low]].forEach(([lab, s], i) => {
+        ctx.fillStyle = C.ink; ctx.font = fnt(700, 26); ctx.fillText(lab, colX[i], sy + 62);
+        ctx.fillStyle = C.black; ctx.font = fnt(900, 38); ctx.fillText(`${TYPES[s.id].short} ${s.score}`, colX[i], sy + 114);
+      });
+    }
+    // 바닥
+    ctx.fillStyle = C.ink; ctx.font = fnt(500, 30); ctx.fillText('나의 독서 취향도 궁금하다면', W / 2, H - 100);
+    ctx.fillStyle = C.black; ctx.font = fnt(900, 36); ctx.fillText('itdapages.github.io/test', W / 2, H - 50);
+    ctx.textAlign = 'left';
+
+    return new Promise((res, rej) => cv.toBlob((b) => (b ? res(b) : rej(new Error('toBlob'))), 'image/png'));
+  }
+
+  function prepareImage() {
+    imgBlob = null;
+    const job = buildImage();
+    imgJob = job;
+    job.then((b) => { if (imgJob === job) imgBlob = b; }).catch(() => {});
+  }
+
+  /* 이미지 저장 창 */
+  let modalURL = null;
+  function openModal(blob) {
+    if (modalURL) URL.revokeObjectURL(modalURL);
+    modalURL = URL.createObjectURL(blob);
+    $('img-preview').src = modalURL;
+    $('img-download').href = modalURL;
+    $('img-modal').hidden = false;
+    $('img-close').focus();
+  }
+  function closeModal() { $('img-modal').hidden = true; $('share-img').focus(); }
+  $('img-close').addEventListener('click', closeModal);
+  $('img-modal').addEventListener('click', (e) => { if (e.target === $('img-modal')) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('img-modal').hidden) closeModal(); });
+
+  $('share-img').addEventListener('click', async () => {
+    const btn = $('share-img');
+    let blob = imgBlob;
+    if (!blob && imgJob) {
+      btn.setAttribute('aria-busy', 'true');
+      try { blob = await imgJob; } catch (_) {}
+      btn.removeAttribute('aria-busy');
+    }
+    if (!blob) { toast('이미지를 만들지 못했어요. 화면을 캡처해 주세요'); return; }
+    const file = new File([blob], 'itda-reading-test.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file] }); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    openModal(blob);
+  });
 
   /* 다시 하기 */
   $('retry').addEventListener('click', () => {
