@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>독서 취향 테스트 · 잇다 itda</title>
+<meta name="description" content="25개 문항으로 알아보는 나의 독서 취향. 다섯 가지 독자 유형 중 나는 어디에 가까울까요? — 독서모임 잇다(itda)">
+<meta name="theme-color" content="#FAF3E8">
+<meta name="color-scheme" content="light">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://itdapages.github.io/test/">
+<meta property="og:title" content="잇다 독서 취향 테스트">
+<meta property="og:description" content="25개 문항 · 3~5분 · 나는 어떤 독자일까?">
+<meta property="og:image" content="https://itdapages.github.io/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../img/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* 잇다 브랜드 색만 사용: 유형별 색 = 파랑 오렌지 핑크 빨강 민트 + 검정 미색 흰색 */
+  :root {
+    --orange: #F3AD46;
+    --black: #000000;
+    --ink: #4B4845;
+    --cream: #FAF3E8;
+    --white: #FFFFFF;
+    --wobble: 255px 14px 225px 16px / 16px 225px 14px 255px;
+    --wobble2: 14px 225px 16px 255px / 225px 16px 255px 14px;
+    --sans: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  body {
+    font-family: var(--sans);
+    color: var(--black);
+    background-color: var(--cream);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.29 0 0 0 0 0.28 0 0 0 0 0.27 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    line-height: 1.7;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  img { display: block; max-width: 100%; height: auto; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; }
+  .wrap { width: 100%; max-width: 560px; margin: 0 auto; padding: 0 20px; }
+  [hidden] { display: none !important; }
+
+  /* 맨 위 */
+  .top { display: flex; justify-content: space-between; align-items: center; padding: 18px 0 0; }
+  .home { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; text-decoration: none; }
+  .home img { width: 34px; }
+  .handle { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; text-decoration: none; color: var(--ink); }
+  .handle svg { width: 18px; height: 18px; }
+
+  /* 버튼 */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 52px; padding: 12px 24px;
+    font-family: var(--sans); font-size: 15px; font-weight: 700; text-decoration: none; letter-spacing: -0.01em;
+    border: 2.5px solid var(--black); border-radius: var(--wobble);
+    background: var(--white); color: var(--black); cursor: pointer;
+    box-shadow: 4px 4px 0 var(--black);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover { transform: translate(-2px, -2px) rotate(-1deg); box-shadow: 6px 6px 0 var(--black); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--black); }
+  .btn.dark { background: var(--black); color: var(--cream); box-shadow: 4px 4px 0 var(--orange); }
+  .btn.dark:hover { box-shadow: 6px 6px 0 var(--orange); }
+  .btn svg { width: 19px; height: 19px; flex: none; }
+  :focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+  .label { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .16em; line-height: 1; padding: 6px 10px 5px; border: 2px solid var(--black); border-radius: var(--wobble); background: var(--white); }
+  .card { background: var(--white); border: 2.5px solid var(--black); border-radius: var(--wobble2); box-shadow: 5px 5px 0 var(--black); }
+
+  /* ───── 시작 화면 ───── */
+  .intro { text-align: center; padding: 34px 0 20px; }
+  .intro .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .2em; color: var(--ink); }
+  .intro h1 { font-size: 38px; font-weight: 900; line-height: 1.25; letter-spacing: -0.03em; margin-top: 8px; }
+  .intro h1 .hl { background: linear-gradient(transparent 62%, var(--orange) 62%, var(--orange) 92%, transparent 92%); padding: 0 2px; }
+  .intro .art { width: min(72%, 300px); margin: 26px auto 8px; }
+  .pills { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 18px; list-style: none; }
+  .pills li { font-size: 13px; font-weight: 700; padding: 5px 13px; border: 2px solid var(--black); border-radius: var(--wobble); background: var(--white); }
+  .pills li:nth-child(2) { background: var(--orange); transform: rotate(-2deg); }
+  .intro .guide { font-size: 16px; color: var(--ink); margin: 20px 0 28px; }
+  .types-preview { margin: 40px auto 0; text-align: left; padding: 20px 20px 18px; }
+  .types-preview h2 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+  .types-preview ul { list-style: none; display: grid; gap: 7px; }
+  .types-preview li { display: flex; align-items: center; gap: 10px; font-size: 14.5px; font-weight: 500; }
+  .types-preview li i { width: 14px; height: 14px; flex: none; border: 2px solid var(--black); border-radius: 50%; background: var(--c); }
+
+  /* ───── 문항 화면 ───── */
+  .quiz { padding: 26px 0 30px; }
+  .qbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .back { display: inline-flex; align-items: center; gap: 4px; background: none; border: 0; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--ink); padding: 6px 2px; }
+  .back:hover { color: var(--black); }
+  .count { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .count b { font-size: 18px; }
+  .progress { height: 18px; border: 2.5px solid var(--black); border-radius: var(--wobble); background: var(--white); overflow: hidden; }
+  .progress i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(-55deg, var(--black) 0 7px, var(--cream) 7px 14px); transition: width .35s ease; }
+  .qcard { margin-top: 24px; padding: 22px 20px 22px; }
+  .qsec { display: inline-block; font-size: 12.5px; font-weight: 700; padding: 4px 11px; border: 2px solid var(--black); border-radius: var(--wobble); background: var(--cream); }
+  .qnum { display: block; font-size: 15px; font-weight: 900; color: var(--orange); -webkit-text-stroke: .4px var(--black); margin-top: 16px; letter-spacing: .02em; }
+  .qtext { font-size: 19px; font-weight: 700; line-height: 1.6; letter-spacing: -0.02em; margin: 4px 0 22px; min-height: 3.2em; outline: none; }
+  .opts { display: grid; gap: 10px; list-style: none; }
+  .opt {
+    width: 100%; display: flex; align-items: center; gap: 12px; text-align: left;
+    min-height: 52px; padding: 10px 16px;
+    font-size: 15.5px; font-weight: 500;
+    background: var(--cream); border: 2px solid var(--black); border-radius: var(--wobble); cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .opts li:nth-child(even) .opt { border-radius: var(--wobble2); }
+  .opt .dot { width: 20px; height: 20px; flex: none; border: 2px solid var(--black); border-radius: 50%; background: var(--white); }
+  .opt:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--black); background: var(--white); }
+  .opt[aria-pressed="true"] { background: var(--black); color: var(--cream); box-shadow: 3px 3px 0 var(--orange); }
+  .opt[aria-pressed="true"] .dot { background: var(--orange); border-color: var(--cream); }
+  .keyhint { display: none; text-align: center; font-size: 12.5px; color: var(--ink); margin-top: 18px; }
+  @media (hover: hover) and (pointer: fine) { .keyhint { display: block; } }
+  .qcard.enter { animation: enter .28s ease; }
+  @keyframes enter { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+
+  /* ───── 결과 화면 ───── */
+  .result { padding: 30px 0 10px; }
+  .r-head { text-align: center; }
+  .r-head h1 { font-size: 30px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.3; margin-top: 12px; }
+  .meta { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 14px; list-style: none; margin-top: 8px; font-size: 13px; color: var(--ink); }
+  .meta b { color: var(--black); font-weight: 700; margin-left: 4px; }
+
+  .type-card { margin-top: 24px; padding: 22px 20px 24px; box-shadow: 6px 6px 0 var(--c); }
+  .kicker { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .kicker span { font-size: 13px; font-weight: 700; padding: 4px 11px; border: 2px solid var(--black); border-radius: var(--wobble); background: var(--c); color: var(--on, var(--black)); }
+  .kicker b { font-size: 15px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .kicker b small { font-size: 12px; font-weight: 500; color: var(--ink); margin-left: 2px; }
+  .type-name { font-size: 26px; font-weight: 900; line-height: 1.35; letter-spacing: -0.03em; margin-top: 14px; }
+  .type-name em { font-style: normal; background: linear-gradient(transparent 62%, var(--c) 62%, var(--c) 92%, transparent 92%); padding: 0 2px; }
+  .type-desc { font-size: 16px; line-height: 1.8; margin-top: 10px; }
+  .rec-t { font-size: 13px; font-weight: 700; color: var(--ink); margin-top: 18px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin-top: 8px; }
+  .chips li { font-size: 14.5px; font-weight: 700; padding: 5px 13px; border: 2px solid var(--black); border-radius: var(--wobble); background: var(--cream); }
+  .chips li:nth-child(even) { border-radius: var(--wobble2); }
+  .low-note { font-size: 14.5px; color: var(--ink); line-height: 1.75; margin-top: 14px; padding-top: 14px; border-top: 2px dashed var(--black); }
+
+  /* 분석표 (인바디처럼) */
+  .sheet { margin-top: 30px; padding: 20px 18px 18px; }
+  .sheet h2 { font-size: 19px; font-weight: 900; letter-spacing: -0.02em; }
+  .sheet .sub { font-size: 13px; color: var(--ink); margin-top: 2px; }
+  .grid { margin-top: 16px; display: grid; grid-template-columns: 84px 1fr 32px; column-gap: 10px; row-gap: 14px; align-items: center; }
+  .grid .zones { grid-column: 2; display: grid; grid-template-columns: 40fr 35fr 25fr; font-size: 12px; font-weight: 700; text-align: center; border-bottom: 2px solid var(--black); padding-bottom: 4px; }
+  .grid .zones span + span { border-left: 1.5px dashed var(--black); }
+  .rname { font-size: 13.5px; font-weight: 700; line-height: 1.3; display: flex; align-items: center; gap: 6px; }
+  .rname i { width: 10px; height: 10px; flex: none; border-radius: 50%; border: 1.5px solid var(--black); background: var(--c); }
+  .track {
+    position: relative; height: 24px; border-left: 2px solid var(--black);
+    background: linear-gradient(90deg, transparent 40%, rgba(243,173,70,.18) 40%, rgba(243,173,70,.18) 75%, transparent 75%);
+  }
+  .track::before, .track::after { content: ""; position: absolute; top: -7px; bottom: -7px; border-left: 1.5px dashed var(--black); }
+  .track::before { left: 40%; }
+  .track::after { left: 75%; }
+  .track .bar { position: absolute; left: 0; top: 4px; bottom: 4px; width: 0; z-index: 1; background: var(--c); border: 2px solid var(--black); border-left-width: 0; border-radius: 0 8px 8px 0; transition: width .8s cubic-bezier(.2,.7,.2,1); }
+  .rscore { font-size: 15px; font-weight: 900; text-align: right; font-variant-numeric: tabular-nums; }
+  .rname.row-top { text-decoration: underline 3px var(--orange); text-underline-offset: 4px; }
+  .sheet .legend { font-size: 12px; color: var(--ink); margin-top: 16px; line-height: 1.6; }
+  .summary { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--black); margin-top: 16px; }
+  .summary div { padding: 10px 4px 0; text-align: center; }
+  .summary div + div { border-left: 1.5px dashed var(--black); }
+  .summary dt { font-size: 12px; font-weight: 700; color: var(--ink); }
+  .summary dd { font-size: 15px; font-weight: 900; line-height: 1.4; margin-top: 2px; }
+
+  .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 34px 0 6px; }
+  .shared-note { text-align: center; font-size: 13px; color: var(--ink); margin-top: 10px; }
+
+  .toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--black); color: var(--cream); font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: var(--wobble); transition: opacity .2s ease, transform .2s ease; z-index: 10; }
+  .toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+  footer { text-align: center; padding: 48px 0 40px; }
+  footer img { width: 84px; margin: 0 auto 8px; }
+  footer .f1 { font-weight: 700; font-size: 14px; }
+  footer .f2 { font-size: 12px; color: var(--ink); margin-top: 2px; }
+  footer a { text-decoration: none; }
+
+  @media (min-width: 860px) {
+    .wrap { max-width: 640px; }
+    .intro h1 { font-size: 48px; }
+    .qtext { font-size: 21px; }
+    .r-head h1 { font-size: 36px; }
+    .type-name { font-size: 30px; }
+    .grid { grid-template-columns: 100px 1fr 36px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="home" href="../" aria-label="잇다 홈으로"><img src="../img/logo.webp" width="412" height="352" alt="">잇다 홈</a>
+      <a class="handle" href="https://www.instagram.com/itda.pages/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        @itda.pages
+      </a>
+    </header>
+
+    <main>
+      <!-- 시작 -->
+      <section class="intro" id="intro" aria-labelledby="intro-t">
+        <p class="eyebrow">ITDA READING TEST</p>
+        <h1 id="intro-t">나는 <span class="hl">어떤 독자</span>일까?<br>독서 취향 테스트</h1>
+        <img class="art" src="../img/icon-books.webp" width="420" height="268" alt="파란 책과 주황 책이 줄무늬 띠로 이어진 크레파스 그림">
+        <ul class="pills">
+          <li>25개 문항</li>
+          <li>약 3~5분</li>
+          <li>결과는 분석표로</li>
+        </ul>
+        <p class="guide">현재의 독서 습관과 취향을 기준으로<br>솔직하게 답해 보세요.</p>
+        <button class="btn dark" type="button" id="start">테스트 시작하기</button>
+
+        <div class="card types-preview">
+          <h2>다섯 가지 독자 유형</h2>
+          <ul id="types-list"></ul>
+        </div>
+      </section>
+
+      <!-- 문항 -->
+      <section class="quiz" id="quiz" aria-label="문항" hidden>
+        <div class="qbar">
+          <button class="back" type="button" id="back"><span aria-hidden="true">←</span> 이전</button>
+          <p class="count" aria-live="polite"><b id="qi">1</b> / <span id="qn">25</span></p>
+        </div>
+        <div class="progress" role="progressbar" aria-label="진행률" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" id="progress"><i></i></div>
+
+        <div class="card qcard" id="qcard">
+          <span class="qsec" id="qsec"></span>
+          <span class="qnum" id="qnum"></span>
+          <p class="qtext" id="qtext" tabindex="-1"></p>
+          <ul class="opts" id="opts"></ul>
+        </div>
+        <p class="keyhint">키보드 숫자 1~5로도 답할 수 있어요</p>
+      </section>
+
+      <!-- 결과 -->
+      <section class="result" id="result" aria-labelledby="result-t" hidden>
+        <div class="r-head">
+          <p class="label">RESULT</p>
+          <h1 id="result-t" tabindex="-1">나의 독서 취향 결과</h1>
+          <ul class="meta" id="meta"></ul>
+        </div>
+
+        <article class="card type-card" id="top-card"></article>
+
+        <article class="card sheet" aria-labelledby="sheet-t">
+          <h2 id="sheet-t">독서 취향 분석표</h2>
+          <p class="sub">영역마다 해당 문항의 평균을 100점으로 바꿨어요</p>
+          <div class="grid" id="grid"></div>
+          <dl class="summary" id="summary"></dl>
+          <p class="legend">낮음 0~39 · 보통 40~74 · 높음 75~100<br>점수가 높을수록 그 방향의 작품에 끌리는 편이에요.</p>
+        </article>
+
+        <article class="card type-card" id="low-card"></article>
+
+        <div class="ctas">
+          <a class="btn dark" href="../#join" id="join-btn">잇다와 함께 읽기</a>
+          <button class="btn" type="button" id="share">결과 공유하기</button>
+          <button class="btn" type="button" id="retry">다시 하기</button>
+        </div>
+        <p class="shared-note" id="shared-note" hidden>링크로 열어 본 결과예요. 나의 독서 취향도 알아볼까요?</p>
+      </section>
+    </main>
+
+    <footer>
+      <a href="../"><img src="../img/logo.webp" width="412" height="352" alt="잇다 로고, 얼룩말"></a>
+      <p class="f1">잇다 itda</p>
+      <p class="f2">책과 책, 사유와 사유를 잇는 독서모임 · © 2026 itda</p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <noscript><p style="text-align:center;padding:20px">테스트는 자바스크립트를 켜야 할 수 있어요.</p></noscript>
+
+<script>
+(() => {
+  /* ───── 결과 유형 ───── */
+  const TYPES = {
+    form:     { name: '문학적 형식에 민감한 독자', key: '문학적 형식', short: '문학적 형식', color: '#5897DF',
+                desc: '문체, 서사 구조, 모호한 결말, 표현의 실험성을 중요하게 여겨요.',
+                authors: ['오정희', '권여선', '버지니아 울프', '앨리스 먼로'] },
+    irony:    { name: '인간의 모순을 관찰하는 독자', key: '인간의 모순', short: '인간의 모순', color: '#F3AD46',
+                desc: '인물의 허위와 욕망, 사회의 아이러니와 일상의 부조리에 관심이 많아요.',
+                authors: ['박완서', '은희경', '위화', '오쿠다 히데오'] },
+    relation: { name: '관계의 이면을 읽는 독자', key: '관계의 이면', short: '관계의 이면', color: '#F2A9A2',
+                desc: '친밀함과 거리, 오해와 상실, 타인을 이해하는 일의 어려움에 관심이 많아요.',
+                authors: ['최진영', '김금희', '최은영', '이언 매큐언'] },
+    society:  { name: '사회와 역사를 읽는 독자', key: '사회와 역사', short: '사회와 역사', color: '#E84E39',
+                desc: '개인의 삶을 넘어 계급, 젠더, 역사적 폭력, 권력 구조를 읽어내요.',
+                authors: ['한강', '김숨', '양귀자', '토니 모리슨'] },
+    world:    { name: '낯선 세계를 탐험하는 독자', key: '낯선 세계', short: '낯선 세계', color: '#8FCEAB',
+                desc: '장르의 경계를 넘나들거나, 인간과 세계를 새로운 관점에서 바라보는 작품을 좋아해요.',
+                authors: ['김초엽', '천선란', '정보라', '어슐러 K. 르 귄'] },
+  };
+  const ORDER = ['form', 'irony', 'relation', 'society', 'world'];
+
+  /* ───── 문항 (sec: 질문지의 묶음, type: 점수가 들어가는 독자 유형) ───── */
+  const SECTIONS = {
+    A: '책을 선택하는 기준',
+    B: '문체와 서사의 취향',
+    C: '감정과 인물을 이해하는 방식',
+    D: '현실과 세계를 바라보는 방식',
+    E: '독서 경험과 발견',
+  };
+  const QUESTIONS = [
+    { sec: 'A', type: 'form',     text: '나는 책을 읽을 때 등단한 작가나 문학상을 수상한 작가의 작품을 찾아 읽는 편이다.' },
+    { sec: 'A', type: 'irony',    text: '나는 책을 고를 때 다른 사람들의 평점이나 리뷰보다 작품 자체에 더 관심을 둔다.' },
+    { sec: 'A', type: 'relation', text: '나는 이미 좋아하는 작가가 있으면 그 작가의 다른 작품도 찾아 읽는다.' },
+    { sec: 'A', type: 'society',  text: '나는 유행하는 책보다 시간이 지나도 읽힐 만한 책을 선택하는 편이다.' },
+    { sec: 'A', type: 'world',    text: '나는 낯선 작가의 작품이라도 주제나 소개가 흥미로우면 읽어 보는 편이다.' },
+    { sec: 'B', type: 'form',     text: '나는 사건이 빠르게 전개되는 소설보다 문장과 묘사를 천천히 음미할 수 있는 소설을 좋아한다.' },
+    { sec: 'B', type: 'form',     text: '나는 인물의 감정을 직접 설명하기보다 행동과 말투로 드러내는 작품을 좋아한다.' },
+    { sec: 'B', type: 'irony',    text: '나는 일상적인 문장으로 인간과 사회를 생생하게 그려내는 작품에 끌린다.' },
+    { sec: 'B', type: 'irony',    text: '나는 유머나 풍자 속에서 인간의 허위와 사회의 모순을 드러내는 작품을 좋아한다.' },
+    { sec: 'B', type: 'form',     text: '나는 시간 순서가 뒤섞이거나 시점이 바뀌는 등 서사 형식이 실험적인 작품도 즐긴다.' },
+    { sec: 'C', type: 'irony',    text: '나는 인물에게 쉽게 공감하기보다 그 인물이 왜 그런 행동을 하는지 생각해 보는 편이다.' },
+    { sec: 'C', type: 'form',     text: '나는 결말에서 감정이 명확하게 정리되기보다 여운이 남는 작품을 좋아한다.' },
+    { sec: 'C', type: 'relation', text: '나는 사랑이나 우정을 아름답게 묘사하는 작품보다 관계의 모순과 불편함까지 보여주는 작품에 끌린다.' },
+    { sec: 'C', type: 'society',  text: '나는 인물의 선택을 옳고 그름으로 판단하기보다 그 선택이 만들어진 조건을 이해하려 한다.' },
+    { sec: 'C', type: 'relation', text: '나는 책을 읽으며 내 경험과 감정을 돌아보는 일이 중요하다.' },
+    { sec: 'D', type: 'society',  text: '나는 개인의 이야기를 통해 사회 구조나 시대의 모순을 드러내는 작품을 좋아한다.' },
+    { sec: 'D', type: 'relation', text: '나는 가족이나 연인처럼 가까운 관계 안에 존재하는 권력과 갈등에 관심이 많다.' },
+    { sec: 'D', type: 'society',  text: '나는 전쟁, 역사적 폭력, 차별처럼 불편한 현실을 다루는 문학도 읽는 편이다.' },
+    { sec: 'D', type: 'world',    text: '나는 인간이 아닌 존재나 낯선 세계를 통해 인간과 현실을 새롭게 바라보는 작품에 끌린다.' },
+    { sec: 'D', type: 'society',  text: '나는 소설을 읽은 뒤 작품이 던지는 철학적·윤리적 질문을 오래 생각하는 편이다.' },
+    { sec: 'E', type: 'form',     text: '나는 책을 읽을 때 밑줄을 긋거나 인상적인 문장을 기록하는 편이다.' },
+    { sec: 'E', type: 'world',    text: '나는 한 작품을 읽은 뒤 비슷한 문제의식을 가진 다른 작가의 작품까지 찾아 읽는다.' },
+    { sec: 'E', type: 'world',    text: '나는 익숙한 취향에 머무르기보다 낯설고 어려운 작품에도 도전하고 싶다.' },
+    { sec: 'E', type: 'world',    text: '나는 책을 통해 다른 사람의 삶과 내가 살아보지 못한 세계를 경험하고 싶다.' },
+    { sec: 'E', type: 'relation', text: '나는 작품을 읽고 나서 다른 사람과 해석이나 감상을 나누는 것을 좋아한다.' },
+  ];
+  const CHOICES = ['전혀 그렇지 않다', '그렇지 않은 편이다', '보통이다', '그런 편이다', '매우 그렇다'];
+  const N = QUESTIONS.length;
+
+  /* ───── 상태 ───── */
+  const $ = (id) => document.getElementById(id);
+  let answers = new Array(N).fill(0);
+  let idx = 0;
+  let startedAt = 0;
+  let locked = false;
+
+  const screens = { intro: $('intro'), quiz: $('quiz'), result: $('result') };
+  function show(name) {
+    for (const k in screens) screens[k].hidden = k !== name;
+    window.scrollTo(0, 0);
+  }
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  /* 시작 화면의 유형 목록 */
+  $('types-list').innerHTML = ORDER.map((id) =>
+    `<li style="--c:${TYPES[id].color}"><i></i>${esc(TYPES[id].name)}</li>`).join('');
+
+  /* ───── 문항 그리기 ───── */
+  $('qn').textContent = N;
+  function renderQuestion(animate) {
+    const q = QUESTIONS[idx];
+    $('qi').textContent = idx + 1;
+    $('qsec').textContent = `${q.sec} · ${SECTIONS[q.sec]}`;
+    $('qnum').textContent = `Q${idx + 1}`;
+    $('qtext').textContent = q.text;
+    const done = answers.filter(Boolean).length;
+    $('progress').firstElementChild.style.width = `${(idx / N) * 100}%`;
+    $('progress').setAttribute('aria-valuenow', String(done));
+    $('opts').innerHTML = CHOICES.map((c, i) =>
+      `<li><button class="opt" type="button" data-v="${i + 1}" aria-pressed="${answers[idx] === i + 1}"><span class="dot" aria-hidden="true"></span>${c}</button></li>`).join('');
+    const card = $('qcard');
+    if (animate) { card.classList.remove('enter'); void card.offsetWidth; card.classList.add('enter'); }
+    $('qtext').focus({ preventScroll: true });
+  }
+
+  function answer(v) {
+    if (locked) return;
+    locked = true;
+    answers[idx] = v;
+    $('opts').querySelectorAll('.opt').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.v === v)));
+    setTimeout(() => {
+      locked = false;
+      if (idx < N - 1) { idx += 1; renderQuestion(true); }
+      else finish();
+    }, 240);
+  }
+
+  $('opts').addEventListener('click', (e) => {
+    const b = e.target.closest('.opt');
+    if (b) answer(+b.dataset.v);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (screens.quiz.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (/^[1-5]$/.test(e.key)) { e.preventDefault(); answer(+e.key); }
+    else if (e.key === 'Backspace') { e.preventDefault(); goBack(); }
+  });
+
+  function goBack() {
+    if (locked) return;
+    if (idx === 0) { show('intro'); $('start').focus(); return; }
+    idx -= 1;
+    renderQuestion(true);
+  }
+  $('back').addEventListener('click', goBack);
+
+  $('start').addEventListener('click', () => {
+    answers = new Array(N).fill(0);
+    idx = 0;
+    startedAt = Date.now();
+    show('quiz');
+    renderQuestion(true);
+  });
+
+  /* ───── 점수 계산 ───── */
+  function scoreAll(ans) {
+    const out = {};
+    for (const id of ORDER) {
+      const vals = QUESTIONS.map((q, i) => (q.type === id ? ans[i] : null)).filter((v) => v !== null);
+      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      out[id] = {
+        id,
+        score: Math.round(((avg - 1) / 4) * 100),
+        strong: vals.filter((v) => v === 5).length / vals.length, // '매우 그렇다' 비율 (동점일 때 사용)
+      };
+    }
+    // 높은 순으로 정렬: 점수 → '매우 그렇다' 비율 → 유형 순서
+    const ranked = ORDER.map((id) => out[id]).sort((a, b) =>
+      b.score - a.score || b.strong - a.strong || ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
+    return { by: out, ranked };
+  }
+  const level = (s) => (s >= 75 ? '높음' : s >= 40 ? '보통' : '낮음');
+
+  /* ───── 결과 ───── */
+  function finish() {
+    $('progress').firstElementChild.style.width = '100%';
+    const secs = startedAt ? Math.round((Date.now() - startedAt) / 1000) : 0;
+    try { history.replaceState(null, '', `#r=${answers.join('')}`); } catch (_) {}
+    renderResult(answers, { secs, shared: false });
+  }
+
+  function typeCard(t, s, kind) {
+    const style = `--c:${t.color};${t.on ? `--on:${t.on}` : ''}`;
+    const isTop = kind === 'top';
+    return {
+      style,
+      html: `
+        <div class="kicker"><span>${isTop ? '내가 높은 영역' : '내가 낮은 영역'}</span><b>${s.score}<small>점 · ${level(s.score)}</small></b></div>
+        <h2 class="type-name"><em>${esc(t.name)}</em></h2>
+        <p class="type-desc">${esc(t.desc)}</p>
+        ${isTop ? '' : '<p class="low-note">평소 덜 찾던 방향이에요. 익숙한 취향 바깥으로 한 줄 이어 보면 새로운 무늬가 생길지도 몰라요.</p>'}
+        <p class="rec-t">${isTop ? '추천 방향' : '이어 읽어 볼 작가'}</p>
+        <ul class="chips">${t.authors.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>`,
+    };
+  }
+
+  function renderResult(ans, { secs, shared }) {
+    const { by, ranked } = scoreAll(ans);
+    const top = ranked[0];
+    const low = ranked[ranked.length - 1];
+    const even = top.score === low.score;
+
+    // 검사 정보
+    const d = new Date();
+    const date = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+    const meta = shared ? [] : [`<li>검사일<b>${date}</b></li>`];
+    meta.push(`<li>문항<b>${N}개</b></li>`);
+    if (secs > 0) meta.push(`<li>소요 시간<b>${secs >= 60 ? `${Math.floor(secs / 60)}분 ` : ''}${secs % 60}초</b></li>`);
+    $('meta').innerHTML = meta.join('');
+
+    // 높은 영역 카드
+    const topT = TYPES[top.id];
+    const tc = typeCard(topT, top, 'top');
+    $('top-card').setAttribute('style', tc.style);
+    $('top-card').innerHTML = tc.html;
+
+    // 분석표
+    $('grid').innerHTML =
+      `<span></span><div class="zones" aria-hidden="true"><span>낮음</span><span>보통</span><span>높음</span></div><span></span>` +
+      ORDER.map((id) => {
+        const t = TYPES[id], s = by[id];
+        return `<div class="rname${id === top.id ? ' row-top' : ''}" style="--c:${t.color}"><i></i>${esc(t.short)}</div>
+          <div class="track" style="--c:${t.color}" role="img" aria-label="${esc(t.short)} ${s.score}점, ${level(s.score)}"><span class="bar${s.score < 4 ? ' min' : ''}" data-w="${Math.max(s.score, 2)}"></span></div>
+          <div class="rscore">${s.score}</div>`;
+      }).join('');
+    $('summary').innerHTML = even
+      ? `<div style="grid-column:1/-1"><dt>영역 균형</dt><dd>다섯 영역이 고르게 나왔어요</dd></div>`
+      : `<div><dt>내가 높은 영역</dt><dd>${esc(TYPES[top.id].short)} ${top.score}</dd></div><div><dt>내가 낮은 영역</dt><dd>${esc(TYPES[low.id].short)} ${low.score}</dd></div>`;
+
+    // 낮은 영역 카드
+    const lowCard = $('low-card');
+    if (even) {
+      lowCard.hidden = true;
+    } else {
+      const lc = typeCard(TYPES[low.id], low, 'low');
+      lowCard.setAttribute('style', lc.style);
+      lowCard.innerHTML = lc.html;
+      lowCard.hidden = false;
+    }
+
+    // 공유받은 링크로 연 경우
+    $('shared-note').hidden = !shared;
+    $('retry').textContent = shared ? '나도 해 보기' : '다시 하기';
+    $('retry').classList.toggle('dark', shared);
+    $('join-btn').classList.toggle('dark', !shared);
+
+    show('result');
+    $('result-t').focus({ preventScroll: true });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      $('grid').querySelectorAll('.bar').forEach((b) => { b.style.width = `${b.dataset.w}%`; });
+    }));
+    lastTop = topT;
+  }
+  let lastTop = null;
+
+  /* 다시 하기 */
+  $('retry').addEventListener('click', () => {
+    try { history.replaceState(null, '', location.pathname); } catch (_) {}
+    answers = new Array(N).fill(0);
+    show('intro');
+    $('start').focus();
+  });
+
+  /* 공유 */
+  const toast = (msg) => {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => t.classList.remove('on'), 2000);
+  };
+  $('share').addEventListener('click', async () => {
+    const url = location.href;
+    const text = lastTop ? `나는 '${lastTop.name}'래요. 잇다 독서 취향 테스트` : '잇다 독서 취향 테스트';
+    if (navigator.share) {
+      try { await navigator.share({ title: '잇다 독서 취향 테스트', text, url }); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    try { await navigator.clipboard.writeText(`${text}\n${url}`); toast('결과 링크를 복사했어요'); }
+    catch (_) { window.prompt('아래 링크를 복사해 주세요', url); }
+  });
+
+  /* 공유 링크(#r=…)로 들어온 경우 결과를 바로 보여 줌 */
+  const m = location.hash.match(/^#r=([1-5]{25})$/);
+  if (m) {
+    answers = m[1].split('').map(Number);
+    renderResult(answers, { secs: 0, shared: true });
+  }
+})();
+</script>
+</body>
+</html>

@@ -123,6 +123,12 @@
   }
   .join .card p { margin: 14px 0 20px; font-size: 16px; color: var(--black); }
 
+  /* 독서 취향 테스트 */
+  .test .card { text-align: center; padding: 24px 22px 26px; }
+  .mini { display: grid; gap: 9px; width: min(100%, 300px); margin: 4px auto 18px; padding: 14px 14px 14px 0; border-left: 2.5px solid var(--black); }
+  .mini span { display: block; height: 16px; width: var(--w); background: var(--c); border: 2px solid var(--black); border-left: 0; border-radius: 0 8px 8px 0; }
+  .test .card p { margin: 14px 0 20px; font-size: 16px; color: var(--black); }
+
   /* 문의 */
   .contact { list-style: none; display: grid; gap: 12px; }
   .contact a {
@@ -153,8 +159,8 @@
     .hero .scene { max-width: 720px; margin: 18px auto 0; }
     .divider { width: 720px; }
     h2 { font-size: 44px; }
-    .about .lead, .join-in, .contact-in { max-width: 600px; margin: 0 auto; }
-    .about .head, .join .head, .contact-sec .head { text-align: center; }
+    .about .lead, .join-in, .contact-in, .test-in { max-width: 600px; margin: 0 auto; }
+    .about .head, .join .head, .contact-sec .head, .test .head { text-align: center; }
     .cards { grid-template-columns: 1fr 1fr; gap: 26px; }
     .join .card { max-width: 600px; margin: 0 auto; }
   }
@@ -215,9 +221,30 @@
 
       <img class="divider" src="img/divider.webp" width="1072" height="105" alt="" style="transform: scaleX(-1)">
 
-      <section class="join" id="join" aria-labelledby="join-t">
+      <section class="test" id="test" aria-labelledby="test-t">
         <div class="head">
           <p class="label">02</p>
+          <h2 id="test-t">나의 독서 무늬는?</h2>
+        </div>
+        <div class="card test-in">
+          <div class="mini" aria-hidden="true">
+            <span style="--c:#5897DF; --w:78%"></span>
+            <span style="--c:#F3AD46; --w:56%"></span>
+            <span style="--c:#F2A9A2; --w:88%"></span>
+            <span style="--c:#E84E39; --w:42%"></span>
+            <span style="--c:#8FCEAB; --w:66%"></span>
+          </div>
+          <span class="badge">25문항 · 3~5분</span>
+          <p>나는 어떤 독자일까요?<br>지금의 독서 습관과 취향으로 알아보는<br>잇다 독서 취향 테스트예요.</p>
+          <a class="btn dark" href="test/">테스트 시작하기</a>
+        </div>
+      </section>
+
+      <img class="divider" src="img/divider.webp" width="1072" height="105" alt="">
+
+      <section class="join" id="join" aria-labelledby="join-t">
+        <div class="head">
+          <p class="label">03</p>
           <h2 id="join-t">함께 이어 볼래요?</h2>
         </div>
         <div class="card">
@@ -231,11 +258,11 @@
         </div>
       </section>
 
-      <img class="divider" src="img/divider.webp" width="1072" height="105" alt="">
+      <img class="divider" src="img/divider.webp" width="1072" height="105" alt="" style="transform: scaleX(-1)">
 
       <section class="contact-sec" aria-labelledby="contact-t">
         <div class="head">
-          <p class="label">03</p>
+          <p class="label">04</p>
           <h2 id="contact-t">궁금한 게 있다면</h2>
         </div>
         <ul class="contact contact-in">
