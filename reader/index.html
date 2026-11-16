@@ -67,10 +67,11 @@
     box-shadow: 4px 4px 0 var(--black);
     transition: transform .15s ease, box-shadow .15s ease;
   }
-  .btn:hover { transform: translate(-2px, -2px) rotate(-1deg); box-shadow: 6px 6px 0 var(--black); }
+  /* 마우스를 올렸을 때 효과는 마우스가 있는 기기에서만 (휴대폰에서 누른 자리에 효과가 남지 않도록) */
+  @media (hover: hover) { .btn:hover { transform: translate(-2px, -2px) rotate(-1deg); box-shadow: 6px 6px 0 var(--black); } }
   .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--black); }
   .btn.dark { background: var(--black); color: var(--cream); box-shadow: 4px 4px 0 var(--orange); }
-  .btn.dark:hover { box-shadow: 6px 6px 0 var(--orange); }
+  @media (hover: hover) { .btn.dark:hover { box-shadow: 6px 6px 0 var(--orange); } }
   .btn svg { width: 19px; height: 19px; flex: none; }
   :focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
 
@@ -97,7 +98,7 @@
   .quiz { padding: 26px 0 30px; }
   .qbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
   .back { display: inline-flex; align-items: center; gap: 4px; background: none; border: 0; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--ink); padding: 6px 2px; }
-  .back:hover { color: var(--black); }
+  @media (hover: hover) { .back:hover { color: var(--black); } }
   .count { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .count b { font-size: 18px; }
   .progress { height: 18px; border: 2.5px solid var(--black); border-radius: var(--wobble); background: var(--white); overflow: hidden; }
@@ -115,7 +116,7 @@
   }
   .opts li:nth-child(even) .opt { border-radius: var(--wobble2); }
   .opt .dot { width: 20px; height: 20px; flex: none; border: 2px solid var(--black); border-radius: 50%; background: var(--white); }
-  .opt:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--black); background: var(--white); }
+  @media (hover: hover) { .opt:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--black); background: var(--white); } }
   .opt[aria-pressed="true"] { background: var(--black); color: var(--cream); box-shadow: 3px 3px 0 var(--orange); }
   .opt[aria-pressed="true"] .dot { background: var(--orange); border-color: var(--cream); }
   .keyhint { display: none; text-align: center; font-size: 12.5px; color: var(--ink); margin-top: 18px; }
