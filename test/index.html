@@ -148,23 +148,22 @@
   .sheet { margin-top: 30px; padding: 20px 18px 18px; }
   .sheet h2 { font-size: 19px; font-weight: 900; letter-spacing: -0.02em; }
   .sheet .sub { font-size: 13px; color: var(--ink); margin-top: 2px; }
-  /* 방사형 그래프 */
-  .radar { display: block; width: 100%; max-width: 400px; height: auto; margin: 10px auto 0; overflow: visible; }
-  .radar .ring { fill: none; stroke: var(--black); stroke-width: 1.2; stroke-dasharray: 4 4; opacity: .55; }
-  .radar .ring.outer { stroke-width: 2; stroke-dasharray: none; opacity: 1; }
-  .radar .band { fill: rgba(243,173,70,.16); fill-rule: evenodd; }
-  .radar .spoke { stroke: var(--black); stroke-width: 1; opacity: .3; }
-  .radar .area { fill: rgba(243,173,70,.55); stroke: var(--black); stroke-width: 2.5; stroke-linejoin: round;
-                 transform-box: view-box; transform-origin: var(--ox) var(--oy); transform: scale(0); transition: transform .8s cubic-bezier(.2,.7,.2,1); }
-  .radar.on .area { transform: scale(1); }
-  .radar .pt { fill: var(--black); stroke: var(--white); stroke-width: 2; }
-  .radar .pt-hit { fill: transparent; cursor: default; }
-  .radar .lab { font-family: var(--sans); font-size: 14px; font-weight: 700; fill: var(--black); }
-  .radar .lab .sc { font-size: 17px; font-weight: 900; }
-  .radar .lab .lv { font-size: 12px; font-weight: 500; fill: var(--ink); }
-  .radar .lab.top-type .nm { text-decoration: underline; text-decoration-color: var(--orange); text-decoration-thickness: 3px; }
-  .sheet .legend { font-size: 12px; color: var(--ink); margin-top: 10px; line-height: 1.6; }
-  .sheet .legend i { display: inline-block; width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px; border: 1.5px dashed rgba(0,0,0,.6); background: rgba(243,173,70,.16); }
+  .grid { margin-top: 16px; display: grid; grid-template-columns: 84px 1fr 32px; column-gap: 10px; row-gap: 14px; align-items: center; }
+  .grid .zones { grid-column: 2; display: grid; grid-template-columns: 40fr 35fr 25fr; font-size: 12px; font-weight: 700; text-align: center; border-bottom: 2px solid var(--black); padding-bottom: 4px; }
+  .grid .zones span + span { border-left: 1.5px dashed var(--black); }
+  .rname { font-size: 13.5px; font-weight: 700; line-height: 1.3; display: flex; align-items: center; gap: 6px; }
+  .rname i { width: 10px; height: 10px; flex: none; border-radius: 50%; border: 1.5px solid var(--black); background: var(--c); }
+  .track {
+    position: relative; height: 24px; border-left: 2px solid var(--black);
+    background: linear-gradient(90deg, transparent 40%, rgba(243,173,70,.18) 40%, rgba(243,173,70,.18) 75%, transparent 75%);
+  }
+  .track::before, .track::after { content: ""; position: absolute; top: -7px; bottom: -7px; border-left: 1.5px dashed var(--black); }
+  .track::before { left: 40%; }
+  .track::after { left: 75%; }
+  .track .bar { position: absolute; left: 0; top: 4px; bottom: 4px; width: 0; z-index: 1; background: var(--c); border: 2px solid var(--black); border-left-width: 0; border-radius: 0 8px 8px 0; transition: width .8s cubic-bezier(.2,.7,.2,1); }
+  .rscore { font-size: 15px; font-weight: 900; text-align: right; font-variant-numeric: tabular-nums; }
+  .rname.row-top { text-decoration: underline 3px var(--orange); text-underline-offset: 4px; }
+  .sheet .legend { font-size: 12px; color: var(--ink); margin-top: 16px; line-height: 1.6; }
   .summary { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--black); margin-top: 16px; }
   .summary div { padding: 10px 4px 0; text-align: center; }
   .summary div + div { border-left: 1.5px dashed var(--black); }
@@ -200,6 +199,7 @@
     .qtext { font-size: 21px; }
     .r-head h1 { font-size: 36px; }
     .type-name { font-size: 30px; }
+    .grid { grid-template-columns: 100px 1fr 36px; }
   }
 </style>
 </head>
@@ -262,9 +262,9 @@
         <article class="card sheet" aria-labelledby="sheet-t">
           <h2 id="sheet-t">독서 취향 분석표</h2>
           <p class="sub">영역마다 해당 문항의 평균을 100점으로 바꿨어요</p>
-          <div id="radar"></div>
+          <div class="grid" id="grid"></div>
           <dl class="summary" id="summary"></dl>
-          <p class="legend"><i aria-hidden="true"></i>안쪽 점선 안은 낮음(0~39), 두 점선 사이는 보통(40~74), 바깥 점선 밖은 높음(75~100)이에요.<br>점수가 높을수록 그 방향의 작품에 끌리는 편이에요.</p>
+          <p class="legend">낮음 0~39 · 보통 40~74 · 높음 75~100<br>점수가 높을수록 그 방향의 작품에 끌리는 편이에요.</p>
         </article>
 
         <article class="card type-card" id="low-card"></article>
@@ -489,52 +489,6 @@
     };
   }
 
-  /* 방사형 그래프: 꼭짓점 5개 = 유형 5개(위에서부터 시계 방향), 안쪽 점선 40 · 바깥 점선 75 · 테두리 100 */
-  function radarSVG(by, topId) {
-    const W = 340, H = 330, cx = 170, cy = 178, R = 105, GAP = 14;
-    const ang = ORDER.map((_, i) => (-90 + i * 72) * Math.PI / 180);
-    const pt = (i, f) => [cx + Math.cos(ang[i]) * R * f, cy + Math.sin(ang[i]) * R * f];
-    const poly = (f) => ORDER.map((_, i) => pt(i, f).map((n) => n.toFixed(1)).join(',')).join(' ');
-    const ring = (f) => `M${poly(f).replace(/ /g, 'L')}Z`;
-
-    const spokes = ORDER.map((_, i) => { const [x, y] = pt(i, 1); return `<line class="spoke" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }).join('');
-    const vals = ORDER.map((id) => Math.max(by[id].score, 2) / 100);
-    const area = vals.map((f, i) => pt(i, f).map((n) => n.toFixed(1)).join(',')).join(' ');
-
-    const dots = ORDER.map((id, i) => {
-      const [x, y] = pt(i, vals[i]);
-      const s = by[id];
-      const isTop = id === topId;
-      return `<g><title>${esc(TYPES[id].short)} ${s.score}점 · ${level(s.score)}</title>
-        <circle class="pt-hit" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="16"/>
-        <circle class="pt" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${isTop ? 7 : 5}"${isTop ? ' style="fill:var(--orange);stroke:var(--black);stroke-width:2.5"' : ''}/></g>`;
-    }).join('');
-
-    const labels = ORDER.map((id, i) => {
-      const c = Math.cos(ang[i]), s = Math.sin(ang[i]);
-      const x = cx + c * (R + GAP), y = cy + s * (R + GAP);
-      const anchor = Math.abs(c) < 0.2 ? 'middle' : c > 0 ? 'start' : 'end';
-      const [l1, l2] = TYPES[id].short.split(' ');
-      const blockH = 17 + 17 + 21;
-      const top = s < -0.9 ? y - blockH : s > 0.5 ? y - 6 : y - blockH / 2;
-      const sc = by[id];
-      return `<text class="lab" text-anchor="${anchor}" x="${x.toFixed(1)}" y="${(top + 13).toFixed(1)}">
-        <tspan x="${x.toFixed(1)}">${esc(l1)}</tspan><tspan x="${x.toFixed(1)}" dy="17">${esc(l2 || '')}</tspan><tspan class="sc" x="${x.toFixed(1)}" dy="21">${sc.score}</tspan><tspan class="lv" dx="3">${level(sc.score)}</tspan></text>`;
-    }).join('');
-
-    const aria = '독서 취향 방사형 그래프. ' + ORDER.map((id) => `${TYPES[id].short} ${by[id].score}점 ${level(by[id].score)}`).join(', ');
-    return `<svg class="radar" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(aria)}" style="--ox:${cx}px;--oy:${cy}px">
-      <path class="band" d="${ring(0.75)} ${ring(0.4)}"/>
-      ${spokes}
-      <polygon class="ring" points="${poly(0.4)}"/>
-      <polygon class="ring" points="${poly(0.75)}"/>
-      <polygon class="ring outer" points="${poly(1)}"/>
-      <polygon class="area" points="${area}"/>
-      ${dots}
-      ${labels}
-    </svg>`;
-  }
-
   function renderResult(ans, { secs, shared }) {
     const { by, ranked } = scoreAll(ans);
     const top = ranked[0];
@@ -555,8 +509,15 @@
     $('top-card').setAttribute('style', tc.style);
     $('top-card').innerHTML = tc.html;
 
-    // 분석표 (방사형 그래프)
-    $('radar').innerHTML = radarSVG(by, top.id);
+    // 분석표
+    $('grid').innerHTML =
+      `<span></span><div class="zones" aria-hidden="true"><span>낮음</span><span>보통</span><span>높음</span></div><span></span>` +
+      ORDER.map((id) => {
+        const t = TYPES[id], s = by[id];
+        return `<div class="rname${id === top.id ? ' row-top' : ''}" style="--c:${t.color}"><i></i>${esc(t.short)}</div>
+          <div class="track" style="--c:${t.color}" role="img" aria-label="${esc(t.short)} ${s.score}점, ${level(s.score)}"><span class="bar${s.score < 4 ? ' min' : ''}" data-w="${Math.max(s.score, 2)}"></span></div>
+          <div class="rscore">${s.score}</div>`;
+      }).join('');
     $('summary').innerHTML = even
       ? `<div style="grid-column:1/-1"><dt>영역 균형</dt><dd>다섯 영역이 고르게 나왔어요</dd></div>`
       : `<div><dt>내가 높은 영역</dt><dd>${esc(TYPES[top.id].short)} ${top.score}</dd></div><div><dt>내가 낮은 영역</dt><dd>${esc(TYPES[low.id].short)} ${low.score}</dd></div>`;
@@ -580,8 +541,7 @@
     show('result');
     $('result-t').focus({ preventScroll: true });
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      const svg = $('radar').querySelector('.radar');
-      if (svg) svg.classList.add('on');
+      $('grid').querySelectorAll('.bar').forEach((b) => { b.style.width = `${b.dataset.w}%`; });
     }));
     lastTop = topT;
     lastResult = { by, top, low, even };
@@ -685,55 +645,52 @@
     return yy - y;
   }
 
-  // 방사형 그래프 (화면의 그래프와 같은 모양을 k배로)
-  function drawRadar(ctx, cx, cy, k, by, topId) {
-    const R = 105 * k, GAP = 14 * k;
-    const ang = ORDER.map((_, i) => (-90 + i * 72) * Math.PI / 180);
-    const pt = (i, f) => [cx + Math.cos(ang[i]) * R * f, cy + Math.sin(ang[i]) * R * f];
-    const path = (f) => { ORDER.forEach((_, i) => { const [x, y] = pt(i, f); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); };
-    // 보통 구간
-    ctx.beginPath(); path(0.75); path(0.4);
-    ctx.fillStyle = 'rgba(243,173,70,.16)'; ctx.fill('evenodd');
-    // 축
-    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(0,0,0,.3)';
-    ORDER.forEach((_, i) => { const [x, y] = pt(i, 1); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y); ctx.stroke(); });
+  // 막대 분석표 (화면의 분석표와 같은 모양): 낮음 0~39 · 보통 40~74 · 높음 75~100
+  function drawBars(ctx, x0, y, iw, rowH, by, topId) {
+    const labelW = 210, gap = 22, scoreW = 76;
+    const tx = x0 + labelW + gap, tw = iw - labelW - gap * 2 - scoreW;
+    const headH = 56;
+    // 머리줄
+    const zones = [['낮음', 0, 0.4], ['보통', 0.4, 0.75], ['높음', 0.75, 1]];
+    ctx.font = fnt(700, 26); ctx.fillStyle = C.black; ctx.textAlign = 'center';
+    zones.forEach(([lab, a, b]) => ctx.fillText(lab, tx + tw * (a + b) / 2, y + 34));
+    ctx.textAlign = 'left';
+    ctx.lineWidth = 4; ctx.strokeStyle = C.black;
+    ctx.beginPath(); ctx.moveTo(tx, y + headH); ctx.lineTo(tx + tw, y + headH); ctx.stroke();
+    const rowsTop = y + headH + 10, rowsBottom = rowsTop + rowH * ORDER.length;
+    // 보통 구간 음영
+    ctx.fillStyle = 'rgba(243,173,70,.18)';
+    ORDER.forEach((_, i) => ctx.fillRect(tx + tw * 0.4, rowsTop + i * rowH + rowH * 0.18, tw * 0.35, rowH * 0.64));
     // 점선 기준선
-    ctx.setLineDash([9, 9]); ctx.lineWidth = 2.4; ctx.strokeStyle = 'rgba(0,0,0,.55)';
-    [0.4, 0.75].forEach((f) => { ctx.beginPath(); path(f); ctx.stroke(); });
+    ctx.setLineDash([8, 8]); ctx.lineWidth = 3;
+    [0.4, 0.75].forEach((f) => { ctx.beginPath(); ctx.moveTo(tx + tw * f, y + 8); ctx.lineTo(tx + tw * f, rowsBottom); ctx.stroke(); });
     ctx.setLineDash([]);
-    ctx.lineWidth = 4; ctx.strokeStyle = C.black; ctx.beginPath(); path(1); ctx.stroke();
-    // 내 점수
-    const vals = ORDER.map((id) => Math.max(by[id].score, 2) / 100);
-    ctx.beginPath(); vals.forEach((f, i) => { const [x, y] = pt(i, f); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath();
-    ctx.fillStyle = 'rgba(243,173,70,.55)'; ctx.fill();
-    ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.strokeStyle = C.black; ctx.stroke();
     ORDER.forEach((id, i) => {
-      const [x, y] = pt(i, vals[i]); const isTop = id === topId;
-      ctx.beginPath(); ctx.arc(x, y, isTop ? 15 : 11, 0, Math.PI * 2);
-      ctx.fillStyle = isTop ? C.orange : C.black; ctx.fill();
-      ctx.lineWidth = isTop ? 5 : 4; ctx.strokeStyle = isTop ? C.black : C.white; ctx.stroke();
+      const t = TYPES[id], s = by[id];
+      const cy = rowsTop + i * rowH + rowH / 2;
+      // 이름
+      ctx.beginPath(); ctx.arc(x0 + 12, cy, 11, 0, Math.PI * 2);
+      ctx.fillStyle = t.color; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = C.black; ctx.stroke();
+      ctx.font = fnt(700, 31); ctx.fillStyle = C.black; ctx.fillText(t.short, x0 + 34, cy + 11);
+      if (id === topId) {
+        const nw = ctx.measureText(t.short).width;
+        ctx.fillStyle = C.orange; ctx.fillRect(x0 + 34, cy + 20, nw, 6);
+      }
+      // 축(왼쪽 실선)
+      ctx.lineWidth = 4; ctx.strokeStyle = C.black;
+      ctx.beginPath(); ctx.moveTo(tx, cy - rowH * 0.32); ctx.lineTo(tx, cy + rowH * 0.32); ctx.stroke();
+      // 막대
+      const bw = tw * Math.max(s.score, 2) / 100, bh = Math.min(34, rowH * 0.42), r = bh / 2;
+      ctx.beginPath();
+      ctx.moveTo(tx, cy - bh / 2); ctx.lineTo(tx + bw - r, cy - bh / 2);
+      ctx.arcTo(tx + bw, cy - bh / 2, tx + bw, cy, r); ctx.arcTo(tx + bw, cy + bh / 2, tx + bw - r, cy + bh / 2, r);
+      ctx.lineTo(tx, cy + bh / 2);
+      ctx.fillStyle = t.color; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = C.black; ctx.stroke();
+      // 점수
+      ctx.font = fnt(900, 38); ctx.fillStyle = C.black; ctx.textAlign = 'right';
+      ctx.fillText(String(s.score), x0 + iw, cy + 13); ctx.textAlign = 'left';
     });
-    // 이름 · 점수
-    ORDER.forEach((id, i) => {
-      const c = Math.cos(ang[i]), s = Math.sin(ang[i]);
-      const x = cx + c * (R + GAP), y = cy + s * (R + GAP);
-      ctx.textAlign = Math.abs(c) < 0.2 ? 'center' : c > 0 ? 'left' : 'right';
-      const blockH = (17 + 17 + 21) * k;
-      const top = s < -0.9 ? y - blockH : s > 0.5 ? y - 6 * k : y - blockH / 2;
-      const [l1, l2] = TYPES[id].short.split(' ');
-      ctx.fillStyle = C.black; ctx.font = fnt(700, 14 * k);
-      ctx.fillText(l1, x, top + 13 * k);
-      ctx.fillText(l2 || '', x, top + 30 * k);
-      const sc = String(by[id].score), lv = level(by[id].score);
-      ctx.font = fnt(900, 17 * k); const scW = ctx.measureText(sc).width;
-      ctx.font = fnt(500, 12 * k); const lvW = ctx.measureText(lv).width;
-      const total = scW + 4 * k + lvW;
-      const startX = ctx.textAlign === 'center' ? x - total / 2 : ctx.textAlign === 'left' ? x : x - total;
-      ctx.textAlign = 'left';
-      ctx.font = fnt(900, 17 * k); ctx.fillText(sc, startX, top + 51 * k);
-      ctx.font = fnt(500, 12 * k); ctx.fillStyle = C.ink; ctx.fillText(lv, startX + scW + 4 * k, top + 51 * k);
-    });
-    ctx.textAlign = 'left'; ctx.lineJoin = 'miter';
+    return rowsBottom - y;
   }
 
   async function buildImage() {
@@ -756,11 +713,10 @@
     const mctx = cv.getContext('2d');
     const h1 = topBlock(mctx, X, 0, CW, t, top, false);
     const y1 = 240, y2 = y1 + h1 + 46;
-    // 1920 높이 안에 들어가도록 그래프 크기(k)를 맞춤
-    const perK = (105 + 14 + 55) + (0.809 * (105 + 14) + 49);
-    const k = Math.min(2.0, Math.max(1.5, (1920 - 150 - y2 - 290) / perK));
-    const radarAbove = (105 + 14) * k + 55 * k, radarBelow = 0.809 * (105 + 14) * k + 49 * k;
-    const h2 = 100 + radarAbove + radarBelow + 40 + 150;
+    // 1920 높이 안에 들어가도록 막대 줄 높이를 맞춤
+    const rowH = Math.min(100, Math.max(76, (1920 - 150 - 30 - y2 - 120 - 66 - 36 - 150) / ORDER.length));
+    const chartH = 66 + rowH * ORDER.length;
+    const h2 = 120 + chartH + 36 + 150;
     const yEnd = y2 + h2 + 14;
     const H = Math.max(1920, Math.ceil(yEnd + 150));
     cv.width = W; cv.height = H;
@@ -779,10 +735,9 @@
     // 카드 2: 분석표
     drawCard(ctx, X, y2, CW, h2, C.black);
     ctx.fillStyle = C.black; ctx.font = fnt(900, 40); ctx.fillText('독서 취향 분석표', X + 52, y2 + 82);
-    const rcy = y2 + 100 + radarAbove;
-    drawRadar(ctx, W / 2, rcy, k, by, top.id);
+    const ch = drawBars(ctx, X + 52, y2 + 120, CW - 104, rowH, by, top.id);
     // 요약
-    const sy = rcy + radarBelow + 40;
+    const sy = y2 + 120 + ch + 36;
     ctx.lineWidth = 4; ctx.strokeStyle = C.black;
     ctx.beginPath(); ctx.moveTo(X + 52, sy); ctx.lineTo(X + CW - 52, sy); ctx.stroke();
     ctx.textAlign = 'center';
