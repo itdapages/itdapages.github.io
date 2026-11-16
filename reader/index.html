@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FAF3E8">
 <meta name="color-scheme" content="light">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://itdapages.github.io/test/">
+<meta property="og:url" content="https://itdapages.github.io/reader/">
 <meta property="og:title" content="잇다 독서 취향 테스트">
 <meta property="og:description" content="25개 문항 · 3~5분 · 나는 어떤 독자일까?">
 <meta property="og:image" content="https://itdapages.github.io/img/og.jpg">
@@ -697,7 +697,7 @@
     const { by, top, low, even } = lastResult;
     const t = TYPES[top.id];
     // 웹 글꼴이 다 받아진 뒤에 그리기 (최대 3초 기다림)
-    const sample = [t.name, t.desc, t.authors.join(''), '잇다 독서 취향 테스트 @itda.pages 내가 높은 영역 낮은 영역 추천 방향 분석표 점 보통 높음 낮음 0123456789 다섯 영역이 고르게 나왔어요 나의 독서 취향도 궁금하다면 itdapages.github.io/test',
+    const sample = [t.name, t.desc, t.authors.join(''), '잇다 독서 취향 테스트 @itda.pages 내가 높은 영역 낮은 영역 추천 방향 분석표 점 보통 높음 낮음 0123456789 다섯 영역이 고르게 나왔어요 나의 독서 취향도 궁금하다면 itdapages.github.io/reader',
       ORDER.map((id) => TYPES[id].short).join('')].join('');
     try {
       await Promise.race([
@@ -754,7 +754,7 @@
     }
     // 바닥
     ctx.fillStyle = C.ink; ctx.font = fnt(500, 30); ctx.fillText('나의 독서 취향도 궁금하다면', W / 2, H - 100);
-    ctx.fillStyle = C.black; ctx.font = fnt(900, 36); ctx.fillText('itdapages.github.io/test', W / 2, H - 50);
+    ctx.fillStyle = C.black; ctx.font = fnt(900, 36); ctx.fillText('itdapages.github.io/reader', W / 2, H - 50);
     ctx.textAlign = 'left';
 
     return new Promise((res, rej) => cv.toBlob((b) => (b ? res(b) : rej(new Error('toBlob'))), 'image/png'));
